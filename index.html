@@ -24,14 +24,14 @@
             margin-top: 20px;
         }
 
-        /* Adjusted .links styling to position vertically on the left */
+        /* Adjusted .links styling */
         .links {
             position: fixed;
             top: 60px; /* Leave space for the title */
             left: 0;
             width: 200px; /* Adjust as needed */
             height: calc(100% - 60px);
-            background-color: #f9f9f9;
+            background-color: white; /* Changed from #f9f9f9 to white */
             padding: 10px;
             box-sizing: border-box;
             display: flex;
@@ -47,14 +47,15 @@
             padding: 5px 0;
         }
 
-        /* Adjusted .question-box to account for the left-side links */
+        /* Adjusted .question-box to center on the page */
         .question-box {
             background-color: #f9f9f9;
             padding: 20px;
             margin-top: 20px;
-            max-width: calc(100% - 240px); /* Adjust width to accommodate links */
-            width: calc(100% - 240px);
-            margin-left: 220px; /* Adjust for links width */
+            max-width: 900px; /* Set a max-width */
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
             border: 2px solid #ccc;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
@@ -92,7 +93,7 @@
             border-radius: 10px;
         }
 
-        /* Adjusted .navigation to account for the left-side links */
+        /* Adjusted .navigation to be centered */
         .navigation {
             display: none;
             justify-content: space-between;
@@ -100,8 +101,8 @@
             padding: 20px;
             position: fixed;
             bottom: 0;
-            left: 220px; /* Adjust for links width */
-            width: calc(100% - 220px); /* Adjust for links width */
+            left: 0;
+            width: 100%;
             background-color: #f9f9f9;
             border-top: 2px solid #ccc;
             box-sizing: border-box;
@@ -128,9 +129,39 @@
         .hint, .solution {
             display: none;
         }
+
+        /* Add padding to body to prevent content overlap with fixed links */
+        body.showing-questions {
+            padding-left: 0;
+        }
+
+        body.showing-links {
+            padding-left: 220px; /* Adjust for links width */
+        }
+
+        /* Media query for smaller screens */
+        @media (max-width: 800px) {
+            .links {
+                position: static;
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 10px 0;
+            }
+
+            .link {
+                padding: 5px 10px;
+            }
+
+            body.showing-links {
+                padding-left: 0;
+            }
+        }
     </style>
 </head>
-<body>
+<body class="showing-links">
 
     <div class="title">PHY1</div>
 
@@ -243,6 +274,8 @@
             document.getElementById('weekContent').style.display = 'block';
             document.querySelector('.navigation').style.display = 'flex';
             document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
+            document.body.classList.remove('showing-links');
+            document.body.classList.add('showing-questions');
             loadQuestions(weekNumber);
         }
 
@@ -251,6 +284,8 @@
             document.getElementById('weekContent').style.display = 'none';
             document.querySelector('.navigation').style.display = 'none';
             document.querySelector('.links').style.display = 'flex'; // Show the links again
+            document.body.classList.remove('showing-questions');
+            document.body.classList.add('showing-links');
         }
 
         function updateQuestionDisplay() {
@@ -282,6 +317,7 @@
         window.onload = function() {
             document.querySelector('.navigation').style.display = 'none';
             document.getElementById('weekContent').style.display = 'none';
+            document.body.classList.add('showing-links');
         }
     </script>
 
