@@ -60,30 +60,15 @@
             padding: 5px 0;
         }
 
-        /* New .contact-box styling */
-        .contact-box {
-            position: fixed;
-            top: 60px; /* Adjusted to be below the title */
-            right: 0;
-            width: 250px; /* Adjust as needed */
-            height: auto;
-            background-color: #f0f0f0; /* Light grey background */
-            padding: 15px;
-            box-sizing: border-box;
-            font-size: 16px;
-            color: #333;
-            z-index: 999; /* Ensure it appears above other content */
-        }
-
-        /* Adjusted .question-box to account for the contact box */
+        /* Adjusted .question-box to center on the page */
         .question-box {
             background-color: #f9f9f9;
             padding: 20px;
             margin-top: 20px;
             max-width: 900px; /* Set a max-width */
-            width: calc(100% - 440px); /* Adjust width to accommodate sidebars */
-            margin-left: 220px; /* Adjust for left links width */
-            margin-right: 250px; /* Adjust for right contact box width */
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
             border: 2px solid #ccc;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
@@ -168,32 +153,16 @@
 
         /* Remove body padding-left */
         body.showing-links {
-            /* No padding adjustments needed */
+            /* padding-left: 220px; */ /* Remove this padding */
         }
 
-        /* Adjust main content when links and contact box are visible */
+        /* Adjust main content when links are visible */
         .content-with-links {
-            margin-left: 220px; /* Adjust content margin for left links */
-            margin-right: 250px; /* Adjust content margin for right contact box */
-            width: calc(100% - 470px); /* Adjust width for both sidebars */
+            margin-left: 220px; /* Adjust content margin */
         }
 
         /* Media query for smaller screens */
-        @media (max-width: 1000px) {
-            /* Adjust the question box and content margins */
-            .question-box,
-            .content-with-links {
-                margin-left: auto;
-                margin-right: auto;
-                width: 90%; /* Adjust width for smaller screens */
-            }
-
-            /* Hide the contact box */
-            .contact-box {
-                display: none;
-            }
-
-            /* Adjust links */
+        @media (max-width: 800px) {
             .links {
                 position: static;
                 width: 100%;
@@ -207,6 +176,11 @@
 
             .link {
                 padding: 5px 10px;
+            }
+
+            .question-box {
+                margin-left: auto;
+                margin-right: auto;
             }
 
             /* Adjust navigation for small screens */
@@ -232,7 +206,7 @@
 
     <div class="title">PHY1</div>
 
-    <!-- Links Section -->
+    <!-- Updated Links Section -->
     <div class="links">
         <!-- Links for weeks 2 to 12 -->
         <div class="link" onclick="showQuestions(2)">Woche 2</div>
@@ -248,17 +222,12 @@
         <div class="link" onclick="showQuestions(12)">Woche 12</div>
     </div>
 
-    <!-- New Contact Box -->
-    <div class="contact-box">
-        Bei Problemen mit der Webseite wenden Sie sich bitte an uns unter <a href="mailto:Mohd@zhaw.ch">Mohd@zhaw.ch</a>
-    </div>
-
-    <div id="weekContent" class="question-box content-with-links">
+    <div id="weekContent" class="question-box">
         <h2>Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
     </div>
 
-    <!-- Navigation with centered question number -->
+    <!-- Updated Navigation with centered question number -->
     <div class="navigation">
         <div class="nav-buttons left-buttons">
             <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
@@ -353,7 +322,7 @@
             document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
             document.body.classList.remove('showing-links');
             document.body.classList.add('showing-questions');
-            // Adjust content margins
+            // Add class to adjust content margin
             document.getElementById('weekContent').classList.remove('content-with-links');
             loadQuestions(weekNumber);
         }
@@ -365,7 +334,7 @@
             document.querySelector('.links').style.display = 'flex'; // Show the links again
             document.body.classList.remove('showing-questions');
             document.body.classList.add('showing-links');
-            // Adjust content margins
+            // Add class to adjust content margin
             document.getElementById('weekContent').classList.add('content-with-links');
         }
 
@@ -406,7 +375,7 @@
             document.querySelector('.navigation').style.display = 'none';
             document.getElementById('weekContent').style.display = 'none';
             document.body.classList.add('showing-links');
-            // Adjust content margins
+            // Add class to adjust content margin
             document.getElementById('weekContent').classList.add('content-with-links');
         }
     </script>
