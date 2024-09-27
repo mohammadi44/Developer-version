@@ -120,7 +120,6 @@
         /* Adjusted .navigation to center the question number */
         .navigation {
             display: none;
-            display: flex;
             align-items: center;
             justify-content: center; /* Center the content */
             padding: 20px;
@@ -284,10 +283,212 @@
         </div>
     </div>
 
-    <!-- Existing JavaScript code -->
+    <!-- JavaScript code -->
     <script>
-        // JavaScript code remains unchanged
-        // ...
+        let currentQuestion = 1;
+        let totalQuestions = 0;
+        let currentWeek = 0; // To keep track of the current week
+
+        // Load questions from WeekX_questions.html
+        function loadQuestions(weekNumber) {
+            currentWeek = weekNumber; // Set the current week
+            fetch(`Week${weekNumber}_questions.html`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('File not found');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
+
+                    const questions = doc.querySelectorAll('h2[id^="question"]');
+                    let questionHTML = '';
+
+                    questions.forEach((question, index) => {
+                        const questionId = `question${index + 1}`;
+                        const hintId = `hint${index + 1}`;
+                        const solutionId = `solution${index + 1}`;
+
+                        const hint = doc.querySelector(`#hint-${index + 1}`);
+                        const solution = doc.querySelector(`#solution-${index + 1}`);
+
+                        questionHTML += `
+                            <div class="question-frame" id="${questionId}" style="display:none;">
+                                <h2>Aufgabe ${index + 1}</h2>
+                                ${question.nextElementSibling ? question.nextElementSibling.outerHTML : ''}
+                                <div class="buttons">
+                                    <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
+                                    <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
+                                </div>
+                                <div id="${hintId}" class="hint-frame hint">${hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : ''}</div>
+                                <div id="${solutionId}" class="solution-frame solution">${solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : ''}</div>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('questionsContainer').innerHTML = questionHTML;
+                    totalQuestions = questions.length;
+
+                    if (totalQuestions === 0) {
+                        // No questions found in the file
+                        handleMissingWeek(weekNumber);
+                    } else {
+                        updateQuestionDisplay();
+
+                        // Bind click events to buttons after questions are loaded
+                        bindButtonEvents();
+
+                        // Ensure MathJax processes any equations
+                        MathJax.typesetPromise();
+
+                        // Show navigation buttons
+                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
+                        document.getElementById('prevBtn').style.display = 'inline-block';
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        document.getElementById('questionNumber').style.display = 'inline-block';
+
+                        // Hide missing week message
+                        document.getElementById('missingWeekMessage').style.display = 'none';
+
+                        // Show question box
+                        document.getElementById('weekContent').style.display = 'block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching questions:', error);
+                    handleMissingWeek(weekNumber);
+                });
+        }
+
+        function handleMissingWeek(weekNumber) {
+            // Replace the title with "Wird in Woche X hochgeladen"
+            document.getElementById('pageTitle').innerText = '';
+            document.getElementById('weekTitle').style.display = 'none'; // Hide the week title inside the question box
+
+            // Hide the questions container and question box
+            document.getElementById('questionsContainer').innerHTML = '';
+            document.getElementById('weekContent').style.display = 'none';
+
+            // Display the missing week message
+            const missingWeekMessage = document.getElementById('missingWeekMessage');
+            missingWeekMessage.innerText = `Wird in Woche ${weekNumber} hochgeladen`;
+            missingWeekMessage.style.display = 'block';
+
+            // Show only the "Zurück zu den Links" button
+            document.getElementById('firstQuestionBtn').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('questionNumber').style.display = 'none';
+
+            // Ensure the navigation bar is visible
+            document.querySelector('.navigation').style.display = 'flex';
+        }
+
+        function bindButtonEvents() {
+            // Bind click event to all hint buttons
+            document.querySelectorAll('.hint-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const hintId = this.getAttribute('data-hint-id');
+                    toggleDisplay(hintId);
+                });
+            });
+
+            // Bind click event to all solution buttons
+            document.querySelectorAll('.solution-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const solutionId = this.getAttribute('data-solution-id');
+                    toggleDisplay(solutionId);
+                });
+            });
+        }
+
+        function toggleDisplay(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = element.style.display === 'none' || element.style.display === '' ? 'block' : 'none';
+        }
+
+        function showQuestions(weekNumber) {
+            currentQuestion = 1; // Reset to the first question
+            document.getElementById('weekContent').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
+            document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
+            document.body.classList.remove('showing-links');
+            document.body.classList.add('showing-questions');
+            // Add class to adjust content margin
+            document.getElementById('weekContent').classList.remove('content-with-links');
+
+            // Reset the page title
+            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('weekTitle').style.display = 'block'; // Show the week title
+
+            // Hide missing week message
+            document.getElementById('missingWeekMessage').style.display = 'none';
+
+            loadQuestions(weekNumber);
+        }
+
+        // Function to return to the homepage
+        function showHomepage() {
+            document.getElementById('weekContent').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.links').style.display = 'flex'; // Show the links again
+            document.body.classList.remove('showing-questions');
+            document.body.classList.add('showing-links');
+            // Add class to adjust content margin
+            document.getElementById('weekContent').classList.add('content-with-links');
+
+            // Reset the page title
+            document.getElementById('pageTitle').innerText = 'PHY1';
+
+            // Hide missing week message
+            document.getElementById('missingWeekMessage').style.display = 'none';
+        }
+
+        // Function to go back to the first question
+        function goToFirstQuestion() {
+            currentQuestion = 1;
+            updateQuestionDisplay();
+            window.scrollTo(0, 0); // Scroll to top of the page
+        }
+
+        function updateQuestionDisplay() {
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionElement = document.getElementById(`question${i}`);
+                questionElement.style.display = (i === currentQuestion) ? 'block' : 'none';
+            }
+
+            document.getElementById('questionNumber').innerText = `${currentQuestion}/${totalQuestions}`;
+            document.getElementById('prevBtn').disabled = (currentQuestion === 1);
+            document.getElementById('nextBtn').disabled = (currentQuestion === totalQuestions);
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                updateQuestionDisplay();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                updateQuestionDisplay();
+            }
+        }
+
+        // Initialize the page
+        window.onload = function() {
+            document.querySelector('.navigation').style.display = 'none';
+            document.getElementById('weekContent').style.display = 'none';
+            document.body.classList.add('showing-links');
+            // Add class to adjust content margin
+            document.getElementById('weekContent').classList.add('content-with-links');
+
+            // Hide missing week message
+            document.getElementById('missingWeekMessage').style.display = 'none';
+        }
     </script>
 
 </body>
