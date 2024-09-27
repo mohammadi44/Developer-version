@@ -109,7 +109,6 @@
         /* Adjusted .navigation to center the question number */
         .navigation {
             display: none;
-            display: flex;
             align-items: center;
             justify-content: center; /* Center the content */
             padding: 20px;
@@ -249,7 +248,12 @@
         function loadQuestions(weekNumber) {
             currentWeek = weekNumber; // Set the current week
             fetch(`Week${weekNumber}_questions.html`)
-                .then(response => response.text())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.text();
+                })
                 .then(data => {
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data, 'text/html');
@@ -281,15 +285,29 @@
 
                     document.getElementById('questionsContainer').innerHTML = questionHTML;
                     totalQuestions = questions.length;
-                    updateQuestionDisplay();
 
-                    // Bind click events to buttons after questions are loaded
-                    bindButtonEvents();
+                    // Only show the content if there are questions
+                    if (totalQuestions > 0) {
+                        document.getElementById('weekContent').style.display = 'block';
+                        document.querySelector('.navigation').style.display = 'flex';
+                        updateQuestionDisplay();
+                        // Bind click events to buttons after questions are loaded
+                        bindButtonEvents();
 
-                    // Ensure MathJax processes any equations
-                    MathJax.typesetPromise();
+                        // Ensure MathJax processes any equations
+                        MathJax.typesetPromise();
+                    } else {
+                        // If no questions found, hide the content
+                        document.getElementById('weekContent').style.display = 'none';
+                        document.querySelector('.navigation').style.display = 'none';
+                    }
                 })
-                .catch(error => console.error('Error fetching questions:', error));
+                .catch(error => {
+                    console.error('Error fetching questions:', error);
+                    // Hide the question content and navigation
+                    document.getElementById('weekContent').style.display = 'none';
+                    document.querySelector('.navigation').style.display = 'none';
+                });
         }
 
         function bindButtonEvents() {
@@ -317,12 +335,13 @@
 
         function showQuestions(weekNumber) {
             currentQuestion = 1; // Reset to the first question
-            document.getElementById('weekContent').style.display = 'block';
-            document.querySelector('.navigation').style.display = 'flex';
+            // Hide content initially
+            document.getElementById('weekContent').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
             document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
             document.body.classList.remove('showing-links');
             document.body.classList.add('showing-questions');
-            // Add class to adjust content margin
+            // Remove class to adjust content margin
             document.getElementById('weekContent').classList.remove('content-with-links');
             loadQuestions(weekNumber);
         }
