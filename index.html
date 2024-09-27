@@ -15,46 +15,44 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            position: relative; /* Add relative positioning */
-            min-height: 100vh;   /* Ensure the body takes up the full viewport height */
+            position: relative;
+            min-height: 100vh;
+            padding-top: 220px; /* Adjusted for larger title */
         }
 
         /* Adjusted .title styling */
         .title {
-            position: fixed; /* Fix the position */
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
-            text-align: center;
+            background-color: white;
+            z-index: 1000;
+            box-sizing: border-box;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+        }
+
+        .title-text {
             font-size: 24px;
             font-weight: bold;
-            margin: 0; /* Remove margin-top */
-            padding: 20px 0; /* Add padding for spacing */
-            background-color: white; /* Optional: background color */
-            z-index: 1000; /* Ensure it stays on top */
+            margin: 0;
         }
 
-        /* Updated style for the logo with increased size */
+        /* Updated style for the logo with doubled size */
         #logo {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            height: 100px; /* Increased height */
-            z-index: 1001; /* Ensure it appears above other elements */
-        }
-
-        /* Adjust body padding to account for the fixed title */
-        body {
-            padding-top: 60px; /* Height of the title */
+            height: 200px; /* Doubled height */
         }
 
         /* Adjusted .links styling */
         .links {
             position: fixed;
-            top: 60px; /* Adjusted to be below the title */
+            top: 220px; /* Adjusted to be below the title */
             left: 0;
-            width: 200px; /* Adjust as needed */
-            height: calc(100% - 60px);
+            width: 200px;
+            height: calc(100% - 220px);
             background-color: white;
             padding: 10px;
             box-sizing: border-box;
@@ -76,7 +74,7 @@
             background-color: #f9f9f9;
             padding: 20px;
             margin-top: 20px;
-            max-width: 900px; /* Set a max-width */
+            max-width: 900px;
             width: 100%;
             margin-left: auto;
             margin-right: auto;
@@ -120,7 +118,7 @@
         .navigation {
             display: none;
             align-items: center;
-            justify-content: center; /* Center the content */
+            justify-content: center;
             padding: 20px;
             position: fixed;
             bottom: 0;
@@ -160,19 +158,14 @@
             display: none;
         }
 
-        /* Remove body padding-left */
-        body.showing-links {
-            /* padding-left: 220px; */ /* Remove this padding */
-        }
-
         /* Adjust main content when links are visible */
         .content-with-links {
-            margin-left: 220px; /* Adjust content margin */
+            margin-left: 220px;
         }
 
         /* Message when week content is missing */
         .missing-week-message {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 50%;
             left: 50%;
@@ -230,19 +223,18 @@
 
             /* Adjust logo size and position on small screens */
             #logo {
-                position: static;
-                display: block;
-                margin: 10px auto 0 auto;
-                height: 80px; /* Adjusted for smaller screens */
+                height: 100px; /* Adjusted for smaller screens */
             }
         }
     </style>
 </head>
 <body class="showing-links">
 
-    <div class="title" id="pageTitle">PHY1</div>
-    <!-- Added the logo image -->
-    <img id="logo" src="logo.png" alt="Logo">
+    <!-- Updated Title Section with Logo Inside -->
+    <div class="title" id="pageTitle">
+        <div class="title-text">PHY1</div>
+        <img id="logo" src="logo.png" alt="Logo">
+    </div>
 
     <!-- Updated Links Section -->
     <div class="links">
@@ -285,9 +277,6 @@
 
     <!-- JavaScript code -->
     <script>
-        // Existing JavaScript code remains unchanged
-        // ...
-
         let currentQuestion = 1;
         let totalQuestions = 0;
         let currentWeek = 0; // To keep track of the current week
@@ -423,7 +412,7 @@
             document.getElementById('weekContent').classList.remove('content-with-links');
 
             // Reset the page title
-            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('pageTitle').innerHTML = '<div class="title-text">PHY1</div><img id="logo" src="logo.png" alt="Logo">';
             document.getElementById('weekTitle').style.display = 'block'; // Show the week title
 
             // Hide missing week message
@@ -443,7 +432,7 @@
             document.getElementById('weekContent').classList.add('content-with-links');
 
             // Reset the page title
-            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('pageTitle').innerHTML = '<div class="title-text">PHY1</div><img id="logo" src="logo.png" alt="Logo">';
 
             // Hide missing week message
             document.getElementById('missingWeekMessage').style.display = 'none';
