@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de"> <!-- Changed to German language code -->
 <head>
     <!-- Existing head content -->
     <meta charset="UTF-8">
@@ -186,9 +186,12 @@
         <div id="questionsContainer"></div>
     </div>
 
-    <!-- Added Homepage button in the navigation -->
+    <!-- Updated Navigation with new buttons -->
     <div class="navigation">
-        <button id="homeBtn" onclick="showHomepage()">Homepage</button>
+        <div class="nav-buttons">
+            <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
+            <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
+        </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons">
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
@@ -199,9 +202,11 @@
     <script>
         let currentQuestion = 1;
         let totalQuestions = 0;
+        let currentWeek = 0; // To keep track of the current week
 
         // Load questions from WeekX_questions.html
         function loadQuestions(weekNumber) {
+            currentWeek = weekNumber; // Set the current week
             fetch(`Week${weekNumber}_questions.html`)
                 .then(response => response.text())
                 .then(data => {
@@ -286,6 +291,13 @@
             document.querySelector('.links').style.display = 'flex'; // Show the links again
             document.body.classList.remove('showing-questions');
             document.body.classList.add('showing-links');
+        }
+
+        // Function to go back to the first question
+        function goToFirstQuestion() {
+            currentQuestion = 1;
+            updateQuestionDisplay();
+            window.scrollTo(0, 0); // Scroll to top of the page
         }
 
         function updateQuestionDisplay() {
