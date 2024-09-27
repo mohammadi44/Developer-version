@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- (Your existing head content) -->
+    <!-- Existing head content -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHY1 Interactive Questions</title>
@@ -10,14 +10,11 @@
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
-        /* (Your existing styles) */
+        /* Existing styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
         }
 
         .title {
@@ -27,15 +24,37 @@
             margin-top: 20px;
         }
 
+        /* Adjusted .links styling to position vertically on the left */
+        .links {
+            position: fixed;
+            top: 60px; /* Leave space for the title */
+            left: 0;
+            width: 200px; /* Adjust as needed */
+            height: calc(100% - 60px);
+            background-color: #f9f9f9;
+            padding: 10px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .link {
+            font-size: 18px;
+            cursor: pointer;
+            text-decoration: underline;
+            color: blue;
+            padding: 5px 0;
+        }
+
+        /* Adjusted .question-box to account for the left-side links */
         .question-box {
             background-color: #f9f9f9;
             padding: 20px;
-            margin-top: 60px;
-            flex-grow: 1;
-            max-width: 900px;
-            width: 100%;
-            margin-left: auto;
-            margin-right: auto;
+            margin-top: 20px;
+            max-width: calc(100% - 240px); /* Adjust width to accommodate links */
+            width: calc(100% - 240px);
+            margin-left: 220px; /* Adjust for links width */
             border: 2px solid #ccc;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             box-sizing: border-box;
@@ -73,6 +92,7 @@
             border-radius: 10px;
         }
 
+        /* Adjusted .navigation to account for the left-side links */
         .navigation {
             display: none;
             justify-content: space-between;
@@ -80,8 +100,8 @@
             padding: 20px;
             position: fixed;
             bottom: 0;
-            left: 0;
-            width: 100%;
+            left: 220px; /* Adjust for links width */
+            width: calc(100% - 220px); /* Adjust for links width */
             background-color: #f9f9f9;
             border-top: 2px solid #ccc;
             box-sizing: border-box;
@@ -108,22 +128,6 @@
         .hint, .solution {
             display: none;
         }
-
-        .links {
-            margin-top: 20px;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .link {
-            font-size: 20px;
-            cursor: pointer;
-            text-decoration: underline;
-            color: blue;
-            padding: 5px 10px;
-        }
     </style>
 </head>
 <body>
@@ -132,7 +136,7 @@
 
     <!-- Updated Links Section -->
     <div class="links">
-        <!-- Generate links for weeks 2 to 12 -->
+        <!-- Links for weeks 2 to 12 -->
         <div class="link" onclick="showQuestions(2)">Woche 2</div>
         <div class="link" onclick="showQuestions(3)">Woche 3</div>
         <div class="link" onclick="showQuestions(4)">Woche 4</div>
@@ -151,7 +155,9 @@
         <div id="questionsContainer"></div>
     </div>
 
+    <!-- Added Homepage button in the navigation -->
     <div class="navigation">
+        <button id="homeBtn" onclick="showHomepage()">Homepage</button>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons">
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
@@ -185,13 +191,13 @@
                         questionHTML += `
                             <div class="question-frame" id="${questionId}" style="display:none;">
                                 <h2>Aufgabe ${index + 1}</h2>
-                                ${question.nextElementSibling.outerHTML}
+                                ${question.nextElementSibling ? question.nextElementSibling.outerHTML : ''}
                                 <div class="buttons">
                                     <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
                                     <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
                                 </div>
-                                <div id="${hintId}" class="hint-frame hint">${hint ? hint.nextElementSibling.outerHTML : ''}</div>
-                                <div id="${solutionId}" class="solution-frame solution">${solution ? solution.nextElementSibling.outerHTML : ''}</div>
+                                <div id="${hintId}" class="hint-frame hint">${hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : ''}</div>
+                                <div id="${solutionId}" class="solution-frame solution">${solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : ''}</div>
                             </div>
                         `;
                     });
@@ -238,6 +244,13 @@
             document.querySelector('.navigation').style.display = 'flex';
             document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
             loadQuestions(weekNumber);
+        }
+
+        // Function to return to the homepage
+        function showHomepage() {
+            document.getElementById('weekContent').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.links').style.display = 'flex'; // Show the links again
         }
 
         function updateQuestionDisplay() {
