@@ -17,7 +17,7 @@
             padding: 0;
             position: relative;
             min-height: 100vh;
-            padding-top: 60px;
+            padding-top: 70px; /* Adjusted padding-top */
         }
 
         /* Adjusted .title styling */
@@ -187,6 +187,7 @@
                 padding: 10px 0;
                 top: auto;
                 overflow: visible; /* Ensure all content is visible */
+                /* Removed margin-top */
             }
 
             .link {
@@ -227,7 +228,7 @@
 
             /* Adjust body padding-top on small screens */
             body {
-                padding-top: 60px;
+                padding-top: 70px; /* Increased padding-top */
             }
 
             /* Adjust .links top position on small screens */
@@ -236,7 +237,7 @@
                 top: auto;
                 height: auto;
                 padding-top: 0;
-                margin-top: -20px;
+                /* Removed margin-top: -20px; */
             }
         }
     </style>
@@ -293,17 +294,8 @@
         // Mapping of week numbers to titles
         const weekTitles = {
             2: 'Physik Grundlagen',
-            3: 'Impuls', 
-            4: '',
-            5: '',
-            6: '',
-            7: '',
-            8: '',
-            9: '',
-            10: '',
-            11: '',
-            12: '',
-            // Add other weeks if necessary
+            3: 'Impuls',
+            // Add titles for other weeks if necessary
         };
 
         // Load questions from WeekX_questions.html
