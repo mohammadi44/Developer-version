@@ -17,7 +17,7 @@
             padding: 0;
             position: relative;
             min-height: 100vh;
-            padding-top: 100px; /* Adjusted to accommodate larger logo */
+            padding-top: 125px; /* Adjusted to accommodate larger logo */
         }
 
         /* Adjusted .title styling */
@@ -40,17 +40,17 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            height: 80px; /* Increased from 50px to 80px */
+            height: 100px; /* Increased from 80px to 100px */
             z-index: 1001; /* Ensure it appears above other elements */
         }
 
         /* Adjusted .links styling */
         .links {
             position: fixed;
-            top: 100px; /* Adjusted to account for larger logo */
+            top: 125px; /* Adjusted to account for larger logo */
             left: 0;
             width: 200px;
-            height: calc(100% - 100px);
+            height: calc(100% - 125px);
             background-color: white;
             padding: 10px;
             box-sizing: border-box;
@@ -156,11 +156,6 @@
             display: none;
         }
 
-        /* Remove body padding-left */
-        body.showing-links {
-            /* padding-left: 220px; */ /* Remove this padding */
-        }
-
         /* Adjust main content when links are visible */
         .content-with-links {
             margin-left: 220px; /* Adjust content margin */
@@ -229,12 +224,12 @@
                 position: static;
                 display: block;
                 margin: 10px auto 0 auto;
-                height: 60px; /* Adjusted for smaller screens */
+                height: 75px; /* Increased from 60px to 75px */
             }
 
             /* Adjust body padding-top on small screens */
             body {
-                padding-top: 140px; /* Increased to accommodate the logo when it moves down */
+                padding-top: 150px; /* Adjusted to accommodate larger logo */
             }
 
             /* Adjust .links top position on small screens */
