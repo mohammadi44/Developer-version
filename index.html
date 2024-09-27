@@ -17,42 +17,40 @@
             padding: 0;
             position: relative;
             min-height: 100vh;
-            padding-top: 220px; /* Adjusted for larger title */
+            padding-top: 100px; /* Adjusted to accommodate larger logo */
         }
 
         /* Adjusted .title styling */
         .title {
-            position: fixed;
+            position: fixed; /* Fix the position */
             top: 0;
             left: 0;
             width: 100%;
-            background-color: white;
-            z-index: 1000;
-            box-sizing: border-box;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px;
-        }
-
-        .title-text {
+            text-align: center;
             font-size: 24px;
             font-weight: bold;
             margin: 0;
+            padding: 20px 0;
+            background-color: white;
+            z-index: 1000;
         }
 
-        /* Updated style for the logo with doubled size */
+        /* Updated style for the logo with increased size */
         #logo {
-            height: 200px; /* Doubled height */
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            height: 80px; /* Increased from 50px to 80px */
+            z-index: 1001; /* Ensure it appears above other elements */
         }
 
         /* Adjusted .links styling */
         .links {
             position: fixed;
-            top: 220px; /* Adjusted to be below the title */
+            top: 100px; /* Adjusted to account for larger logo */
             left: 0;
             width: 200px;
-            height: calc(100% - 220px);
+            height: calc(100% - 100px);
             background-color: white;
             padding: 10px;
             box-sizing: border-box;
@@ -158,14 +156,19 @@
             display: none;
         }
 
+        /* Remove body padding-left */
+        body.showing-links {
+            /* padding-left: 220px; */ /* Remove this padding */
+        }
+
         /* Adjust main content when links are visible */
         .content-with-links {
-            margin-left: 220px;
+            margin-left: 220px; /* Adjust content margin */
         }
 
         /* Message when week content is missing */
         .missing-week-message {
-            display: none;
+            display: none; /* Hidden by default */
             position: absolute;
             top: 50%;
             left: 50%;
@@ -223,18 +226,33 @@
 
             /* Adjust logo size and position on small screens */
             #logo {
-                height: 100px; /* Adjusted for smaller screens */
+                position: static;
+                display: block;
+                margin: 10px auto 0 auto;
+                height: 60px; /* Adjusted for smaller screens */
+            }
+
+            /* Adjust body padding-top on small screens */
+            body {
+                padding-top: 140px; /* Increased to accommodate the logo when it moves down */
+            }
+
+            /* Adjust .links top position on small screens */
+            .links {
+                position: static;
+                top: auto;
+                height: auto;
+                padding-top: 0;
+                margin-top: -20px;
             }
         }
     </style>
 </head>
 <body class="showing-links">
 
-    <!-- Updated Title Section with Logo Inside -->
-    <div class="title" id="pageTitle">
-        <div class="title-text">PHY1</div>
-        <img id="logo" src="logo.png" alt="Logo">
-    </div>
+    <div class="title" id="pageTitle">PHY1</div>
+    <!-- Adjusted the logo size -->
+    <img id="logo" src="logo.png" alt="Logo">
 
     <!-- Updated Links Section -->
     <div class="links">
@@ -412,7 +430,7 @@
             document.getElementById('weekContent').classList.remove('content-with-links');
 
             // Reset the page title
-            document.getElementById('pageTitle').innerHTML = '<div class="title-text">PHY1</div><img id="logo" src="logo.png" alt="Logo">';
+            document.getElementById('pageTitle').innerText = 'PHY1';
             document.getElementById('weekTitle').style.display = 'block'; // Show the week title
 
             // Hide missing week message
@@ -432,7 +450,7 @@
             document.getElementById('weekContent').classList.add('content-with-links');
 
             // Reset the page title
-            document.getElementById('pageTitle').innerHTML = '<div class="title-text">PHY1</div><img id="logo" src="logo.png" alt="Logo">';
+            document.getElementById('pageTitle').innerText = 'PHY1';
 
             // Hide missing week message
             document.getElementById('missingWeekMessage').style.display = 'none';
