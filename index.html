@@ -109,6 +109,7 @@
         /* Adjusted .navigation to center the question number */
         .navigation {
             display: none;
+            display: flex;
             align-items: center;
             justify-content: center; /* Center the content */
             padding: 20px;
@@ -203,7 +204,7 @@
 </head>
 <body class="showing-links">
 
-    <div class="title">PHY1</div>
+    <div class="title" id="pageTitle">PHY1</div>
 
     <!-- Updated Links Section -->
     <div class="links">
@@ -222,7 +223,8 @@
     </div>
 
     <div id="weekContent" class="question-box">
-        <h2>Physik Grundlagen</h2>
+        <!-- The title inside the question box -->
+        <h2 id="weekTitle">Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
     </div>
 
@@ -250,7 +252,7 @@
             fetch(`Week${weekNumber}_questions.html`)
                 .then(response => {
                     if (!response.ok) {
-                        throw new Error('Network response was not ok');
+                        throw new Error('File not found');
                     }
                     return response.text();
                 })
@@ -286,28 +288,47 @@
                     document.getElementById('questionsContainer').innerHTML = questionHTML;
                     totalQuestions = questions.length;
 
-                    // Only show the content if there are questions
-                    if (totalQuestions > 0) {
-                        document.getElementById('weekContent').style.display = 'block';
-                        document.querySelector('.navigation').style.display = 'flex';
+                    if (totalQuestions === 0) {
+                        // No questions found in the file
+                        handleMissingWeek(weekNumber);
+                    } else {
                         updateQuestionDisplay();
+
                         // Bind click events to buttons after questions are loaded
                         bindButtonEvents();
 
                         // Ensure MathJax processes any equations
                         MathJax.typesetPromise();
-                    } else {
-                        // If no questions found, hide the content
-                        document.getElementById('weekContent').style.display = 'none';
-                        document.querySelector('.navigation').style.display = 'none';
+
+                        // Show navigation buttons
+                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
+                        document.getElementById('prevBtn').style.display = 'inline-block';
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        document.getElementById('questionNumber').style.display = 'inline-block';
                     }
                 })
                 .catch(error => {
                     console.error('Error fetching questions:', error);
-                    // Hide the question content and navigation
-                    document.getElementById('weekContent').style.display = 'none';
-                    document.querySelector('.navigation').style.display = 'none';
+                    handleMissingWeek(weekNumber);
                 });
+        }
+
+        function handleMissingWeek(weekNumber) {
+            // Replace the title with "Wird in Woche X hochgeladen"
+            document.getElementById('pageTitle').innerText = `Wird in Woche ${weekNumber} hochgeladen`;
+            document.getElementById('weekTitle').style.display = 'none'; // Hide the week title inside the question box
+
+            // Hide the questions container
+            document.getElementById('questionsContainer').innerHTML = '';
+
+            // Show only the "Zurück zu den Links" button
+            document.getElementById('firstQuestionBtn').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('questionNumber').style.display = 'none';
+
+            // Ensure the navigation bar is visible
+            document.querySelector('.navigation').style.display = 'flex';
         }
 
         function bindButtonEvents() {
@@ -335,14 +356,18 @@
 
         function showQuestions(weekNumber) {
             currentQuestion = 1; // Reset to the first question
-            // Hide content initially
-            document.getElementById('weekContent').style.display = 'none';
-            document.querySelector('.navigation').style.display = 'none';
+            document.getElementById('weekContent').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
             document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
             document.body.classList.remove('showing-links');
             document.body.classList.add('showing-questions');
-            // Remove class to adjust content margin
+            // Add class to adjust content margin
             document.getElementById('weekContent').classList.remove('content-with-links');
+
+            // Reset the page title
+            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('weekTitle').style.display = 'block'; // Show the week title
+
             loadQuestions(weekNumber);
         }
 
@@ -355,6 +380,9 @@
             document.body.classList.add('showing-links');
             // Add class to adjust content margin
             document.getElementById('weekContent').classList.add('content-with-links');
+
+            // Reset the page title
+            document.getElementById('pageTitle').innerText = 'PHY1';
         }
 
         // Function to go back to the first question
