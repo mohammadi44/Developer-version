@@ -17,7 +17,7 @@
             padding: 0;
             position: relative;
             min-height: 100vh;
-            padding-top: 125px; /* Adjusted to accommodate larger logo */
+            padding-top: 140px; /* Adjusted to accommodate larger logo */
         }
 
         /* Adjusted .title styling */
@@ -40,17 +40,17 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            height: 100px; /* Increased from 80px to 100px */
+            height: 120px; /* Increased from 80px to 120px */
             z-index: 1001; /* Ensure it appears above other elements */
         }
 
         /* Adjusted .links styling */
         .links {
             position: fixed;
-            top: 125px; /* Adjusted to account for larger logo */
+            top: 140px; /* Adjusted to account for larger logo */
             left: 0;
             width: 200px;
-            height: calc(100% - 125px);
+            height: calc(100% - 140px);
             background-color: white;
             padding: 10px;
             box-sizing: border-box;
@@ -156,6 +156,11 @@
             display: none;
         }
 
+        /* Remove body padding-left */
+        body.showing-links {
+            /* padding-left: 220px; */ /* Remove this padding */
+        }
+
         /* Adjust main content when links are visible */
         .content-with-links {
             margin-left: 220px; /* Adjust content margin */
@@ -224,12 +229,12 @@
                 position: static;
                 display: block;
                 margin: 10px auto 0 auto;
-                height: 75px; /* Increased from 60px to 75px */
+                height: 90px; /* Adjusted for smaller screens */
             }
 
             /* Adjust body padding-top on small screens */
             body {
-                padding-top: 150px; /* Adjusted to accommodate larger logo */
+                padding-top: 170px; /* Increased to accommodate the larger logo */
             }
 
             /* Adjust .links top position on small screens */
