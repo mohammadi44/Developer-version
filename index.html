@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="de"> <!-- Changed to German language code -->
+<html lang="de">
 <head>
     <!-- Existing head content -->
     <meta charset="UTF-8">
@@ -93,11 +93,12 @@
             border-radius: 10px;
         }
 
-        /* Adjusted .navigation to be centered */
+        /* Adjusted .navigation to center the question number */
         .navigation {
             display: none;
-            justify-content: space-between;
+            display: flex;
             align-items: center;
+            justify-content: center; /* Center the content */
             padding: 20px;
             position: fixed;
             bottom: 0;
@@ -113,8 +114,20 @@
             gap: 10px;
         }
 
+        /* Position the left and right buttons */
+        .nav-buttons.left-buttons {
+            position: absolute;
+            left: 20px;
+        }
+
+        .nav-buttons.right-buttons {
+            position: absolute;
+            right: 20px;
+        }
+
         .current-question {
             font-weight: bold;
+            font-size: 18px;
         }
 
         h1 {
@@ -158,6 +171,23 @@
             body.showing-links {
                 padding-left: 0;
             }
+
+            /* Adjust navigation for small screens */
+            .navigation {
+                flex-direction: column;
+                position: static;
+                padding: 10px;
+            }
+
+            .nav-buttons.left-buttons,
+            .nav-buttons.right-buttons {
+                position: static;
+                margin: 10px 0;
+            }
+
+            .current-question {
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
@@ -186,14 +216,14 @@
         <div id="questionsContainer"></div>
     </div>
 
-    <!-- Updated Navigation with new buttons -->
+    <!-- Updated Navigation with centered question number -->
     <div class="navigation">
-        <div class="nav-buttons">
+        <div class="nav-buttons left-buttons">
             <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
             <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
         </div>
         <span id="questionNumber" class="current-question">1/5</span>
-        <div class="nav-buttons">
+        <div class="nav-buttons right-buttons">
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
             <button id="nextBtn" onclick="nextQuestion()">Nächste</button>
         </div>
