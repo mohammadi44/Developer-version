@@ -35,8 +35,6 @@
             z-index: 1000;
         }
 
-        /* Removed #logo styles */
-
         /* Adjusted .links styling */
         .links {
             position: fixed;
@@ -149,11 +147,6 @@
             display: none;
         }
 
-        /* Remove body padding-left */
-        body.showing-links {
-            /* padding-left: 220px; */
-        }
-
         /* Adjust main content when links are visible */
         .content-with-links {
             margin-left: 220px;
@@ -161,14 +154,23 @@
 
         /* Message when week content is missing */
         .missing-week-message {
-            display: none;
+            display: none; /* Hidden by default */
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            text-align: center; /* Center text and image */
+        }
+
+        .missing-week-message img {
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 20px;
+        }
+
+        .missing-week-message div {
             font-size: 24px;
             font-weight: bold;
-            text-align: center;
         }
 
         /* Media query for smaller screens */
@@ -356,7 +358,7 @@
         }
 
         function handleMissingWeek(weekNumber) {
-            // Replace the title with "Wird in Woche X hochgeladen"
+            // Replace the title with empty string
             document.getElementById('pageTitle').innerText = '';
             document.getElementById('weekTitle').style.display = 'none'; // Hide the week title inside the question box
 
@@ -364,9 +366,12 @@
             document.getElementById('questionsContainer').innerHTML = '';
             document.getElementById('weekContent').style.display = 'none';
 
-            // Display the missing week message
+            // Display the missing week message with image
             const missingWeekMessage = document.getElementById('missingWeekMessage');
-            missingWeekMessage.innerText = `Wird in Woche ${weekNumber} hochgeladen`;
+            missingWeekMessage.innerHTML = `
+                <img src="under.png" alt="Under Construction">
+                <div>Wird in Woche ${weekNumber} hochgeladen</div>
+            `;
             missingWeekMessage.style.display = 'block';
 
             // Show only the "Zurück zu den Links" button
