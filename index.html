@@ -15,7 +15,8 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            padding-top: 60px; /* Height of the title */
+            position: relative; /* Add relative positioning */
+            min-height: 100vh;   /* Ensure the body takes up the full viewport height */
         }
 
         /* Adjusted .title styling */
@@ -31,6 +32,11 @@
             padding: 20px 0; /* Add padding for spacing */
             background-color: white; /* Optional: background color */
             z-index: 1000; /* Ensure it stays on top */
+        }
+
+        /* Adjust body padding to account for the fixed title */
+        body {
+            padding-top: 60px; /* Height of the title */
         }
 
         /* Adjusted .links styling */
@@ -72,28 +78,6 @@
             flex-direction: column;
         }
 
-        /* Styles for when week is missing */
-        .missing-week {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: calc(100vh - 60px - 40px); /* Adjust for title and margins */
-        }
-
-        #missingWeekMessage {
-            /* Apply button styles */
-            display: none; /* Initially hidden */
-            cursor: pointer;
-            border: 2px solid white;
-            background-color: rgba(204, 204, 204, 0.3);
-            color: blue;
-            padding: 20px;
-            font-size: 24px;
-            border-radius: 10px;
-            text-align: center;
-        }
-
         .question-frame, .hint-frame, .solution-frame {
             border: 2px solid black;
             padding: 20px;
@@ -127,6 +111,7 @@
         /* Adjusted .navigation to center the question number */
         .navigation {
             display: none;
+            display: flex;
             align-items: center;
             justify-content: center; /* Center the content */
             padding: 20px;
@@ -178,6 +163,18 @@
             margin-left: 220px; /* Adjust content margin */
         }
 
+        /* Message when week content is missing */
+        .missing-week-message {
+            display: none; /* Hidden by default */
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+        }
+
         /* Media query for smaller screens */
         @media (max-width: 800px) {
             .links {
@@ -217,10 +214,11 @@
                 margin: 10px 0;
             }
 
-            /* Adjust missing week message for small screens */
-            .missing-week {
-                height: auto;
-                padding: 20px;
+            .missing-week-message {
+                position: static;
+                transform: none;
+                margin-top: 50px;
+                padding: 0 20px;
             }
         }
     </style>
@@ -245,12 +243,15 @@
         <div class="link" onclick="showQuestions(12)">Woche 12</div>
     </div>
 
+    <!-- Question content -->
     <div id="weekContent" class="question-box">
         <!-- The title inside the question box -->
         <h2 id="weekTitle">Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
-        <div id="missingWeekMessage"></div>
     </div>
+
+    <!-- Message when week content is missing -->
+    <div id="missingWeekMessage" class="missing-week-message"></div>
 
     <!-- Updated Navigation with centered question number -->
     <div class="navigation">
@@ -329,6 +330,12 @@
                         document.getElementById('prevBtn').style.display = 'inline-block';
                         document.getElementById('nextBtn').style.display = 'inline-block';
                         document.getElementById('questionNumber').style.display = 'inline-block';
+
+                        // Hide missing week message
+                        document.getElementById('missingWeekMessage').style.display = 'none';
+
+                        // Show question box
+                        document.getElementById('weekContent').style.display = 'block';
                     }
                 })
                 .catch(error => {
@@ -338,15 +345,20 @@
         }
 
         function handleMissingWeek(weekNumber) {
-            // Update the missing week message
-            const missingMessage = `Wird in Woche ${weekNumber} hochgeladen`;
-            document.getElementById('missingWeekMessage').innerText = missingMessage;
-            document.getElementById('missingWeekMessage').style.display = 'block';
+            // Replace the title with "Wird in Woche X hochgeladen"
+            document.getElementById('pageTitle').innerText = '';
+            document.getElementById('weekTitle').style.display = 'none'; // Hide the week title inside the question box
 
-            // Add 'missing-week' class to weekContent
-            document.getElementById('weekContent').classList.add('missing-week');
+            // Hide the questions container and question box
+            document.getElementById('questionsContainer').innerHTML = '';
+            document.getElementById('weekContent').style.display = 'none';
 
-            // Hide navigation buttons except 'Zurück zu den Links'
+            // Display the missing week message
+            const missingWeekMessage = document.getElementById('missingWeekMessage');
+            missingWeekMessage.innerText = `Wird in Woche ${weekNumber} hochgeladen`;
+            missingWeekMessage.style.display = 'block';
+
+            // Show only the "Zurück zu den Links" button
             document.getElementById('firstQuestionBtn').style.display = 'none';
             document.getElementById('prevBtn').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
@@ -386,21 +398,15 @@
             document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
             document.body.classList.remove('showing-links');
             document.body.classList.add('showing-questions');
-            // Remove class to adjust content margin
+            // Add class to adjust content margin
             document.getElementById('weekContent').classList.remove('content-with-links');
 
-            // Hide missing week message and remove 'missing-week' class
-            document.getElementById('missingWeekMessage').style.display = 'none';
-            document.getElementById('weekContent').classList.remove('missing-week');
-
-            // Reset the week title
+            // Reset the page title
+            document.getElementById('pageTitle').innerText = 'PHY1';
             document.getElementById('weekTitle').style.display = 'block'; // Show the week title
 
-            // Show navigation buttons
-            document.getElementById('firstQuestionBtn').style.display = 'inline-block';
-            document.getElementById('prevBtn').style.display = 'inline-block';
-            document.getElementById('nextBtn').style.display = 'inline-block';
-            document.getElementById('questionNumber').style.display = 'inline-block';
+            // Hide missing week message
+            document.getElementById('missingWeekMessage').style.display = 'none';
 
             loadQuestions(weekNumber);
         }
@@ -418,9 +424,8 @@
             // Reset the page title
             document.getElementById('pageTitle').innerText = 'PHY1';
 
-            // Hide missing week message and remove 'missing-week' class
+            // Hide missing week message
             document.getElementById('missingWeekMessage').style.display = 'none';
-            document.getElementById('weekContent').classList.remove('missing-week');
         }
 
         // Function to go back to the first question
@@ -462,6 +467,9 @@
             document.body.classList.add('showing-links');
             // Add class to adjust content margin
             document.getElementById('weekContent').classList.add('content-with-links');
+
+            // Hide missing week message
+            document.getElementById('missingWeekMessage').style.display = 'none';
         }
     </script>
 
