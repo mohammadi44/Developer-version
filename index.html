@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <!-- (Your existing head content) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHY1 Interactive Questions</title>
@@ -9,6 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
+        /* (Your existing styles) */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -63,12 +65,12 @@
 
         button {
             cursor: pointer;
-            border: 2px solid white; /* White border for buttons */
-            background-color: rgba(204, 204, 204, 0.3); /* Fainter grey background */
-            color: blue; /* Blue text color */
+            border: 2px solid white;
+            background-color: rgba(204, 204, 204, 0.3);
+            color: blue;
             padding: 10px;
             font-size: 16px;
-            border-radius: 10px; /* Rounded edges */
+            border-radius: 10px;
         }
 
         .navigation {
@@ -107,25 +109,44 @@
             display: none;
         }
 
-        .link {
+        .links {
             margin-top: 20px;
-            margin-left: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .link {
             font-size: 20px;
             cursor: pointer;
             text-decoration: underline;
             color: blue;
-            position: absolute;
-            top: 20px;
-            left: 20px;
+            padding: 5px 10px;
         }
     </style>
 </head>
 <body>
 
     <div class="title">PHY1</div>
-    <div class="link" id="week1Link" onclick="showQuestions()">Woche 2</div>
 
-    <div id="week1" class="question-box">
+    <!-- Updated Links Section -->
+    <div class="links">
+        <!-- Generate links for weeks 2 to 12 -->
+        <div class="link" onclick="showQuestions(2)">Woche 2</div>
+        <div class="link" onclick="showQuestions(3)">Woche 3</div>
+        <div class="link" onclick="showQuestions(4)">Woche 4</div>
+        <div class="link" onclick="showQuestions(5)">Woche 5</div>
+        <div class="link" onclick="showQuestions(6)">Woche 6</div>
+        <div class="link" onclick="showQuestions(7)">Woche 7</div>
+        <div class="link" onclick="showQuestions(8)">Woche 8</div>
+        <div class="link" onclick="showQuestions(9)">Woche 9</div>
+        <div class="link" onclick="showQuestions(10)">Woche 10</div>
+        <div class="link" onclick="showQuestions(11)">Woche 11</div>
+        <div class="link" onclick="showQuestions(12)">Woche 12</div>
+    </div>
+
+    <div id="weekContent" class="question-box">
         <h2>Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
     </div>
@@ -139,117 +160,117 @@
     </div>
 
     <script>
-    let currentQuestion = 1;
-    let totalQuestions = 0;
+        let currentQuestion = 1;
+        let totalQuestions = 0;
 
-    // Load questions from Week1_questions.html
-    function loadQuestions() {
-        fetch('Week1_questions.html')
-            .then(response => response.text())
-            .then(data => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(data, 'text/html');
+        // Load questions from WeekX_questions.html
+        function loadQuestions(weekNumber) {
+            fetch(`Week${weekNumber}_questions.html`)
+                .then(response => response.text())
+                .then(data => {
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(data, 'text/html');
 
-                const questions = doc.querySelectorAll('h2[id^="question"]');
-                let questionHTML = '';
+                    const questions = doc.querySelectorAll('h2[id^="question"]');
+                    let questionHTML = '';
 
-                questions.forEach((question, index) => {
-                    const questionId = `question${index + 1}`;
-                    const hintId = `hint${index + 1}`;
-                    const solutionId = `solution${index + 1}`;
+                    questions.forEach((question, index) => {
+                        const questionId = `question${index + 1}`;
+                        const hintId = `hint${index + 1}`;
+                        const solutionId = `solution${index + 1}`;
 
-                    const hint = doc.querySelector(`#hint-${index + 1}`);
-                    const solution = doc.querySelector(`#solution-${index + 1}`);
+                        const hint = doc.querySelector(`#hint-${index + 1}`);
+                        const solution = doc.querySelector(`#solution-${index + 1}`);
 
-                    questionHTML += `
-                        <div class="question-frame" id="${questionId}" style="display:none;">
-                            <h2>Aufgabe ${index + 1}</h2>
-                            ${question.nextElementSibling.outerHTML}
-                            <div class="buttons">
-                                <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
-                                <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
+                        questionHTML += `
+                            <div class="question-frame" id="${questionId}" style="display:none;">
+                                <h2>Aufgabe ${index + 1}</h2>
+                                ${question.nextElementSibling.outerHTML}
+                                <div class="buttons">
+                                    <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
+                                    <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
+                                </div>
+                                <div id="${hintId}" class="hint-frame hint">${hint ? hint.nextElementSibling.outerHTML : ''}</div>
+                                <div id="${solutionId}" class="solution-frame solution">${solution ? solution.nextElementSibling.outerHTML : ''}</div>
                             </div>
-                            <div id="${hintId}" class="hint-frame hint">${hint.nextElementSibling.outerHTML}</div>
-                            <div id="${solutionId}" class="solution-frame solution">${solution.nextElementSibling.outerHTML}</div>
-                        </div>
-                    `;
+                        `;
+                    });
+
+                    document.getElementById('questionsContainer').innerHTML = questionHTML;
+                    totalQuestions = questions.length;
+                    updateQuestionDisplay();
+
+                    // Bind click events to buttons after questions are loaded
+                    bindButtonEvents();
+
+                    // Ensure MathJax processes any equations
+                    MathJax.typesetPromise();
+                })
+                .catch(error => console.error('Error fetching questions:', error));
+        }
+
+        function bindButtonEvents() {
+            // Bind click event to all hint buttons
+            document.querySelectorAll('.hint-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const hintId = this.getAttribute('data-hint-id');
+                    toggleDisplay(hintId);
                 });
+            });
 
-                document.getElementById('questionsContainer').innerHTML = questionHTML;
-                totalQuestions = questions.length;
+            // Bind click event to all solution buttons
+            document.querySelectorAll('.solution-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const solutionId = this.getAttribute('data-solution-id');
+                    toggleDisplay(solutionId);
+                });
+            });
+        }
+
+        function toggleDisplay(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = element.style.display === 'none' || element.style.display === '' ? 'block' : 'none';
+        }
+
+        function showQuestions(weekNumber) {
+            currentQuestion = 1; // Reset to the first question
+            document.getElementById('weekContent').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
+            document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
+            loadQuestions(weekNumber);
+        }
+
+        function updateQuestionDisplay() {
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionElement = document.getElementById(`question${i}`);
+                questionElement.style.display = (i === currentQuestion) ? 'block' : 'none';
+            }
+
+            document.getElementById('questionNumber').innerText = `${currentQuestion}/${totalQuestions}`;
+            document.getElementById('prevBtn').disabled = (currentQuestion === 1);
+            document.getElementById('nextBtn').disabled = (currentQuestion === totalQuestions);
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
                 updateQuestionDisplay();
-
-                // Bind click events to buttons after questions are loaded
-                bindButtonEvents();
-
-                // Ensure MathJax processes any equations
-                MathJax.typesetPromise();
-            })
-            .catch(error => console.error('Error fetching questions:', error));
-    }
-
-    function bindButtonEvents() {
-        // Bind click event to all hint buttons
-        document.querySelectorAll('.hint-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const hintId = this.getAttribute('data-hint-id');
-                toggleDisplay(hintId);
-            });
-        });
-
-        // Bind click event to all solution buttons
-        document.querySelectorAll('.solution-btn').forEach(button => {
-            button.addEventListener('click', function() {
-                const solutionId = this.getAttribute('data-solution-id');
-                toggleDisplay(solutionId);
-            });
-        });
-    }
-
-    function toggleDisplay(elementId) {
-        const element = document.getElementById(elementId);
-        element.style.display = element.style.display === 'none' || element.style.display === '' ? 'block' : 'none';
-    }
-
-    function showQuestions() {
-        document.getElementById('week1').style.display = 'block';
-        document.querySelector('.navigation').style.display = 'flex';
-        document.getElementById('week1Link').style.display = 'none';
-        updateQuestionDisplay();
-    }
-
-    function updateQuestionDisplay() {
-        for (let i = 1; i <= totalQuestions; i++) {
-            const questionElement = document.getElementById(`question${i}`);
-            questionElement.style.display = (i === currentQuestion) ? 'block' : 'none';
+            }
         }
 
-        document.getElementById('questionNumber').innerText = `${currentQuestion}/${totalQuestions}`;
-        document.getElementById('prevBtn').disabled = (currentQuestion === 1);
-        document.getElementById('nextBtn').disabled = (currentQuestion === totalQuestions);
-    }
-
-    function prevQuestion() {
-        if (currentQuestion > 1) {
-            currentQuestion--;
-            updateQuestionDisplay();
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                updateQuestionDisplay();
+            }
         }
-    }
 
-    function nextQuestion() {
-        if (currentQuestion < totalQuestions) {
-            currentQuestion++;
-            updateQuestionDisplay();
+        // Initialize the page
+        window.onload = function() {
+            document.querySelector('.navigation').style.display = 'none';
+            document.getElementById('weekContent').style.display = 'none';
         }
-    }
-
-    // Initialize and load questions
-    window.onload = function() {
-        loadQuestions();
-        document.querySelector('.navigation').style.display = 'none';
-    }
-</script>
-
+    </script>
 
 </body>
 </html>
