@@ -407,7 +407,14 @@
             document.querySelectorAll('.hint-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const hintId = this.getAttribute('data-hint-id');
+                    const hintElement = document.getElementById(hintId);
+                    const isHidden = hintElement.style.display === 'none' || hintElement.style.display === '';
                     toggleDisplay(hintId);
+                    if (isHidden) {
+                        this.innerText = 'Hinweis verbergen';
+                    } else {
+                        this.innerText = 'Hinweis anzeigen';
+                    }
                 });
             });
 
@@ -415,7 +422,14 @@
             document.querySelectorAll('.solution-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const solutionId = this.getAttribute('data-solution-id');
+                    const solutionElement = document.getElementById(solutionId);
+                    const isHidden = solutionElement.style.display === 'none' || solutionElement.style.display === '';
                     toggleDisplay(solutionId);
+                    if (isHidden) {
+                        this.innerText = 'Lösung verbergen';
+                    } else {
+                        this.innerText = 'Lösung anzeigen';
+                    }
                 });
             });
         }
