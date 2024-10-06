@@ -282,6 +282,9 @@
         let totalQuestions = 0;
         let currentWeek = 0;
 
+        // Store the loaded questions and solutions
+        let loadedQuestions = [];
+
         const weekTitles = {
             2: 'Physik Grundlagen',
             3: 'Impuls',
@@ -306,6 +309,7 @@
 
                     const questions = doc.querySelectorAll('h2[id^="question"]');
                     let questionHTML = '';
+                    loadedQuestions = []; // Reset the loaded questions
 
                     questions.forEach((question, index) => {
                         const questionId = `question${index + 1}`;
@@ -315,16 +319,27 @@
                         const hint = doc.querySelector(`#hint-${index + 1}`);
                         const solution = doc.querySelector(`#solution-${index + 1}`);
 
+                        const questionContent = question.nextElementSibling ? question.nextElementSibling.outerHTML : '';
+                        const hintContent = hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : '';
+                        const solutionContent = solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : '';
+
+                        // Store the question and solution content
+                        loadedQuestions.push({
+                            questionNumber: index + 1,
+                            questionContent: questionContent,
+                            solutionContent: solutionContent
+                        });
+
                         questionHTML += `
                             <div class="question-frame" id="${questionId}" style="display:none;">
                                 <h2>Aufgabe ${index + 1}</h2>
-                                ${question.nextElementSibling ? question.nextElementSibling.outerHTML : ''}
+                                ${questionContent}
                                 <div class="buttons">
                                     <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
                                     <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
                                 </div>
-                                <div id="${hintId}" class="hint-frame hint">${hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : ''}</div>
-                                <div id="${solutionId}" class="solution-frame solution">${solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : ''}</div>
+                                <div id="${hintId}" class="hint-frame hint">${hintContent}</div>
+                                <div id="${solutionId}" class="solution-frame solution">${solutionContent}</div>
                             </div>
                         `;
                     });
@@ -461,12 +476,19 @@
         }
 
         function downloadPDF() {
+            if (loadedQuestions.length === 0) {
+                alert('Keine Fragen zum Exportieren gefunden.');
+                return;
+            }
+
+            // Create a container for the PDF content
             const pdfContainer = document.createElement('div');
             pdfContainer.style.position = 'absolute';
             pdfContainer.style.left = '-9999px';
             pdfContainer.id = 'pdfContainer';
 
-            const styles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'));
+            // Include CSS styles in the pdfContainer
+            const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
             styles.forEach(style => {
                 if (style.tagName.toLowerCase() === 'style') {
                     const styleClone = document.createElement('style');
@@ -480,61 +502,62 @@
                 }
             });
 
+            // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
             pdfTitle.innerText = document.getElementById('weekTitle').innerText + ' - Aufgaben';
             pdfContainer.appendChild(pdfTitle);
 
-            const totalQuestions = document.querySelectorAll('.question-frame').length;
+            // Questions first
+            loadedQuestions.forEach((item) => {
+                const questionHeading = document.createElement('h2');
+                questionHeading.innerText = `Aufgabe ${item.questionNumber}`;
+                pdfContainer.appendChild(questionHeading);
 
-            for (let i = 1; i <= totalQuestions; i++) {
-                const questionElement = document.getElementById(`question${i}`).cloneNode(true);
-                questionElement.style.display = 'block';
+                const questionContentDiv = document.createElement('div');
+                questionContentDiv.innerHTML = item.questionContent;
+                pdfContainer.appendChild(questionContentDiv);
+            });
 
-                const buttons = questionElement.querySelector('.buttons');
-                if (buttons) buttons.parentNode.removeChild(buttons);
-
-                const hintElement = questionElement.querySelector('.hint-frame');
-                if (hintElement) hintElement.parentNode.removeChild(hintElement);
-
-                const solutionElement = questionElement.querySelector('.solution-frame');
-                if (solutionElement) solutionElement.parentNode.removeChild(solutionElement);
-
-                pdfContainer.appendChild(questionElement);
-            }
-
+            // Add a page break
             const pageBreak = document.createElement('div');
             pageBreak.style.pageBreakAfter = 'always';
             pdfContainer.appendChild(pageBreak);
 
+            // Solutions next
             const solutionsTitle = document.createElement('h1');
             solutionsTitle.innerText = 'Lösungen';
             pdfContainer.appendChild(solutionsTitle);
 
-            for (let i = 1; i <= totalQuestions; i++) {
-                const questionHeading = document.createElement('h2');
-                questionHeading.innerText = `Aufgabe ${i}`;
-                pdfContainer.appendChild(questionHeading);
+            loadedQuestions.forEach((item) => {
+                const solutionHeading = document.createElement('h2');
+                solutionHeading.innerText = `Aufgabe ${item.questionNumber}`;
+                pdfContainer.appendChild(solutionHeading);
 
-                const solutionElement = document.getElementById(`question${i}`).querySelector('.solution-frame').cloneNode(true);
-                solutionElement.style.display = 'block';
+                const solutionContentDiv = document.createElement('div');
+                solutionContentDiv.innerHTML = item.solutionContent;
+                pdfContainer.appendChild(solutionContentDiv);
+            });
 
-                pdfContainer.appendChild(solutionElement);
-            }
-
+            // Append the container to the body
             document.body.appendChild(pdfContainer);
 
+            // Ensure MathJax has typeset the content in pdfContainer
             MathJax.typesetPromise([pdfContainer]).then(() => {
-                const opt = {
-                    margin:       1,
-                    filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
+                setTimeout(() => {
+                    // Use html2pdf to generate the PDF
+                    const opt = {
+                        margin:       1,
+                        filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true },
+                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    };
 
-                html2pdf().set(opt).from(pdfContainer).save().then(() => {
-                    document.body.removeChild(pdfContainer);
-                });
+                    html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                        // Remove the temporary container
+                        document.body.removeChild(pdfContainer);
+                    });
+                }, 1000); // Wait for 1 second to ensure rendering
             });
         }
 
