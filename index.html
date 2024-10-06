@@ -176,7 +176,7 @@
         #pdfContainer {
             font-size: 14px; /* Increase font size */
             line-height: 1.5;
-            width: 180mm; /* Content width matching PDF width minus margins */
+            width: 210mm; /* A4 width */
         }
 
         #pdfContainer h1, #pdfContainer h2 {
@@ -197,6 +197,8 @@
         #pdfContainer div {
             margin-bottom: 15px;
             text-align: justify;
+            margin-left: 20mm;
+            margin-right: 20mm; /* Add margins */
         }
 
         @media (max-width: 800px) {
@@ -464,7 +466,7 @@
             // Set additional styles
             pdfContainer.style.fontSize = '14px'; // Increase font size
             pdfContainer.style.lineHeight = '1.5';
-            pdfContainer.style.width = '180mm'; // Content width matching A4 minus margins
+            pdfContainer.style.width = '210mm'; // A4 width
 
             // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
@@ -481,12 +483,14 @@
 
                 const questionContentDiv = document.createElement('div');
                 questionContentDiv.innerHTML = item.questionContent;
+                questionContentDiv.style.marginLeft = '20mm'; // Add margin
+                questionContentDiv.style.marginRight = '20mm';
                 pdfContainer.appendChild(questionContentDiv);
             });
 
             // Add a page break before solutions
             const pageBreak = document.createElement('div');
-            pageBreak.style.pageBreakBefore = 'always';
+            pageBreak.style.pageBreakAfter = 'always';
             pdfContainer.appendChild(pageBreak);
 
             // Solutions next
@@ -503,6 +507,8 @@
 
                 const solutionContentDiv = document.createElement('div');
                 solutionContentDiv.innerHTML = item.solutionContent;
+                solutionContentDiv.style.marginLeft = '20mm'; // Add margin
+                solutionContentDiv.style.marginRight = '20mm';
                 pdfContainer.appendChild(solutionContentDiv);
             });
 
@@ -512,28 +518,43 @@
             // Wait for MathJax to finish typesetting
             await MathJax.typesetPromise([pdfContainer]);
 
+            // Use html2canvas to render the content
+            const pdfWidth = 210; // A4 size in mm
+            const pdfHeight = 297; // A4 size in mm
+
+            const canvas = await html2canvas(pdfContainer, {
+                scale: 2,
+                useCORS: true,
+                width: pdfContainer.scrollWidth,
+                height: pdfContainer.scrollHeight,
+                windowWidth: pdfContainer.scrollWidth,
+                windowHeight: pdfContainer.scrollHeight
+            });
+
             // Create jsPDF instance
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'mm', 'a4');
 
-            // Generate PDF from HTML
-            await pdf.html(pdfContainer, {
-                callback: function (pdf) {
-                    pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
-                    // Clean up
-                    document.body.removeChild(pdfContainer);
-                },
-                margin: [20, 15, 20, 15], // top, left, bottom, right margins in mm
-                autoPaging: 'text',
-                x: 0,
-                y: 0,
-                html2canvas: {
-                    scale: 0.8, // Adjust scale if needed
-                    useCORS: true,
-                },
-                width: 180, // Max width of content on PDF (A4 width - margins)
-                windowWidth: pdfContainer.scrollWidth
-            });
+            // Calculate dimensions
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            // Add the image to PDF, handling multiple pages if necessary
+            let position = 0;
+            while (position < imgHeight) {
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight, undefined, 'FAST');
+                position += pdfHeight;
+                if (position < imgHeight) {
+                    pdf.addPage();
+                }
+            }
+
+            // Save the PDF
+            pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
+
+            // Clean up
+            document.body.removeChild(pdfContainer);
         }
 
         window.onload = function() {
