@@ -267,6 +267,8 @@
         <!-- The title inside the question box -->
         <h2 id="weekTitle">Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
+        <!-- Add Download PDF Button -->
+        <button id="downloadPdfBtn" onclick="downloadPdf()" style="margin-top: 20px; display: none;">Download PDF</button>
     </div>
 
     <!-- Message when week content is missing -->
@@ -366,8 +368,9 @@
                         // Hide missing week message
                         document.getElementById('missingWeekMessage').style.display = 'none';
 
-                        // Show question box
+                        // Show question box and download PDF button
                         document.getElementById('weekContent').style.display = 'block';
+                        document.getElementById('downloadPdfBtn').style.display = 'inline-block';
                     }
                 })
                 .catch(error => {
@@ -506,6 +509,13 @@
             if (currentQuestion < totalQuestions) {
                 currentQuestion++;
                 updateQuestionDisplay();
+            }
+        }
+
+        // Function to download PDF for the current week
+        function downloadPdf() {
+            if (currentWeek > 0) {
+                window.location.href = `Woche${currentWeek}_questions.pdf`;
             }
         }
 
