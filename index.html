@@ -172,37 +172,64 @@
             font-weight: bold;
         }
 
-        /* Additional styles for PDF content */
-        #pdfContainer {
-            font-size: 14px; /* Increase font size */
-            line-height: 1.5;
-            width: 210mm; /* A4 width */
-        }
-
-        #pdfContainer h1, #pdfContainer h2 {
-            text-align: center;
-        }
-
-        #pdfContainer h1 {
-            font-size: 20px;
-            margin-bottom: 10px;
-        }
-
-        #pdfContainer h2 {
-            font-size: 18px;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-
-        #pdfContainer div {
-            margin-bottom: 15px;
-            text-align: justify;
-            margin-left: 20mm;
-            margin-right: 20mm; /* Add margins */
-        }
-
         @media (max-width: 800px) {
-            /* Existing responsive styles */
+            .links {
+                position: static;
+                width: 100%;
+                height: auto;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 10px 0;
+                top: auto;
+                overflow: visible;
+            }
+
+            .link {
+                padding: 5px 10px;
+                flex: 1 1 30%;
+                text-align: center;
+                box-sizing: border-box;
+            }
+
+            .question-box {
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            .navigation {
+                flex-direction: column;
+                position: static;
+                padding: 10px;
+            }
+
+            .nav-buttons.left-buttons,
+            .nav-buttons.right-buttons {
+                position: static;
+                margin: 10px 0;
+            }
+
+            .current-question {
+                margin: 10px 0;
+            }
+
+            .missing-week-message {
+                position: static;
+                transform: none;
+                margin-top: 50px;
+                padding: 0 20px;
+            }
+
+            body {
+                padding-top: 70px;
+            }
+
+            .links {
+                position: static;
+                top: auto;
+                height: auto;
+                padding-top: 0;
+            }
         }
     </style>
 </head>
@@ -463,32 +490,28 @@
             pdfContainer.style.left = '-9999px';
             pdfContainer.id = 'pdfContainer';
 
-            // Set additional styles
-            pdfContainer.style.fontSize = '14px'; // Increase font size
-            pdfContainer.style.lineHeight = '1.5';
-            pdfContainer.style.width = '210mm'; // A4 width
+            // Apply a larger font size for the PDF content
+            pdfContainer.style.fontSize = '18px'; // Increase the font size as desired
+            pdfContainer.style.lineHeight = '1.5'; // Optional: Increase line height for better readability
+            pdfContainer.style.maxWidth = '800px'; // Optional: Set a max-width for the content
 
             // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
             pdfTitle.innerText = document.getElementById('weekTitle').innerText + ' - Aufgaben';
-            pdfTitle.style.textAlign = 'center';
             pdfContainer.appendChild(pdfTitle);
 
             // Questions first
             loadedQuestions.forEach((item) => {
                 const questionHeading = document.createElement('h2');
                 questionHeading.innerText = `Aufgabe ${item.questionNumber}`;
-                questionHeading.style.textAlign = 'center';
                 pdfContainer.appendChild(questionHeading);
 
                 const questionContentDiv = document.createElement('div');
                 questionContentDiv.innerHTML = item.questionContent;
-                questionContentDiv.style.marginLeft = '20mm'; // Add margin
-                questionContentDiv.style.marginRight = '20mm';
                 pdfContainer.appendChild(questionContentDiv);
             });
 
-            // Add a page break before solutions
+            // Add a page break
             const pageBreak = document.createElement('div');
             pageBreak.style.pageBreakAfter = 'always';
             pdfContainer.appendChild(pageBreak);
@@ -496,19 +519,15 @@
             // Solutions next
             const solutionsTitle = document.createElement('h1');
             solutionsTitle.innerText = 'Lösungen';
-            solutionsTitle.style.textAlign = 'center';
             pdfContainer.appendChild(solutionsTitle);
 
             loadedQuestions.forEach((item) => {
                 const solutionHeading = document.createElement('h2');
                 solutionHeading.innerText = `Aufgabe ${item.questionNumber}`;
-                solutionHeading.style.textAlign = 'center';
                 pdfContainer.appendChild(solutionHeading);
 
                 const solutionContentDiv = document.createElement('div');
                 solutionContentDiv.innerHTML = item.solutionContent;
-                solutionContentDiv.style.marginLeft = '20mm'; // Add margin
-                solutionContentDiv.style.marginRight = '20mm';
                 pdfContainer.appendChild(solutionContentDiv);
             });
 
@@ -519,36 +538,27 @@
             await MathJax.typesetPromise([pdfContainer]);
 
             // Use html2canvas to render the content
-            const pdfWidth = 210; // A4 size in mm
-            const pdfHeight = 297; // A4 size in mm
-
             const canvas = await html2canvas(pdfContainer, {
                 scale: 2,
                 useCORS: true,
-                width: pdfContainer.scrollWidth,
-                height: pdfContainer.scrollHeight,
-                windowWidth: pdfContainer.scrollWidth,
-                windowHeight: pdfContainer.scrollHeight
+                scrollX: -window.scrollX,
+                scrollY: -window.scrollY,
+                windowWidth: document.documentElement.offsetWidth,
+                windowHeight: document.documentElement.offsetHeight
             });
 
             // Create jsPDF instance
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
+            const pdf = new jsPDF('p', 'pt', 'a4');
 
             // Calculate dimensions
             const imgData = canvas.toDataURL('image/png');
             const imgProps = pdf.getImageProperties(imgData);
-            const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
 
-            // Add the image to PDF, handling multiple pages if necessary
-            let position = 0;
-            while (position < imgHeight) {
-                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, imgHeight, undefined, 'FAST');
-                position += pdfHeight;
-                if (position < imgHeight) {
-                    pdf.addPage();
-                }
-            }
+            // Add image to PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
 
             // Save the PDF
             pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
