@@ -335,4 +335,158 @@
                         const solution = doc.querySelector(`#solution-${index + 1}`);
 
                         const questionContent = question.nextElementSibling ? question.nextElementSibling.outerHTML : '';
-                        const hintContent = hint &&
+                        const hintContent = hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : '';
+                        const solutionContent = solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : '';
+
+                        // Store the question and solution content
+                        loadedQuestions.push({
+                            questionNumber: index + 1,
+                            questionContent: questionContent,
+                            solutionContent: solutionContent
+                        });
+
+                        questionHTML += `
+                            <div class="question-frame" id="${questionId}" style="display:none;">
+                                <h2>Aufgabe ${index + 1}</h2>
+                                ${questionContent}
+                                <div class="buttons">
+                                    <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
+                                    <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
+                                </div>
+                                <div id="${hintId}" class="hint-frame hint">${hintContent}</div>
+                                <div id="${solutionId}" class="solution-frame solution">${solutionContent}</div>
+                            </div>
+                        `;
+                    });
+
+                    document.getElementById('questionsContainer').innerHTML = questionHTML;
+                    totalQuestions = questions.length;
+
+                    if (totalQuestions === 0) {
+                        handleMissingWeek(weekNumber);
+                    } else {
+                        updateQuestionDisplay();
+                        bindButtonEvents();
+                        MathJax.typesetPromise();
+                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
+                        document.getElementById('prevBtn').style.display = 'inline-block';
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        document.getElementById('questionNumber').style.display = 'inline-block';
+                        document.getElementById('missingWeekMessage').style.display = 'none';
+                        document.getElementById('weekContent').style.display = 'block';
+                        document.getElementById('downloadPdfBtn').style.display = 'inline-block';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching questions:', error);
+                    handleMissingWeek(weekNumber);
+                });
+        }
+
+        function handleMissingWeek(weekNumber) {
+            document.getElementById('pageTitle').innerText = '';
+            document.getElementById('weekTitle').style.display = 'none';
+            document.getElementById('questionsContainer').innerHTML = '';
+            document.getElementById('weekContent').style.display = 'none';
+
+            const missingWeekMessage = document.getElementById('missingWeekMessage');
+            missingWeekMessage.innerHTML = `
+                <img src="under.png" alt="Under Construction">
+                <div>Wird in Woche ${weekNumber} hochgeladen</div>
+            `;
+            missingWeekMessage.style.display = 'block';
+
+            document.getElementById('firstQuestionBtn').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('questionNumber').style.display = 'none';
+            document.getElementById('downloadPdfBtn').style.display = 'none';
+
+            document.querySelector('.navigation').style.display = 'flex';
+        }
+
+        function bindButtonEvents() {
+            document.querySelectorAll('.hint-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const hintId = this.getAttribute('data-hint-id');
+                    const hintElement = document.getElementById(hintId);
+                    const isHidden = hintElement.style.display === 'none' || hintElement.style.display === '';
+                    toggleDisplay(hintId);
+                    this.innerText = isHidden ? 'Hinweis verbergen' : 'Hinweis anzeigen';
+                });
+            });
+
+            document.querySelectorAll('.solution-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const solutionId = this.getAttribute('data-solution-id');
+                    const solutionElement = document.getElementById(solutionId);
+                    const isHidden = solutionElement.style.display === 'none' || solutionElement.style.display === '';
+                    toggleDisplay(solutionId);
+                    this.innerText = isHidden ? 'Lösung verbergen' : 'Lösung anzeigen';
+                });
+            });
+        }
+
+        function toggleDisplay(elementId) {
+            const element = document.getElementById(elementId);
+            element.style.display = element.style.display === 'none' || element.style.display === '' ? 'block' : 'none';
+        }
+
+        function goToFirstQuestion() {
+            currentQuestion = 1;
+            updateQuestionDisplay();
+            window.scrollTo(0, 0);
+        }
+
+        function updateQuestionDisplay() {
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionElement = document.getElementById(`question${i}`);
+                questionElement.style.display = (i === currentQuestion) ? 'block' : 'none';
+            }
+
+            document.getElementById('questionNumber').innerText = `${currentQuestion}/${totalQuestions}`;
+            document.getElementById('prevBtn').disabled = (currentQuestion === 1);
+            document.getElementById('nextBtn').disabled = (currentQuestion === totalQuestions);
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 1) {
+                currentQuestion--;
+                updateQuestionDisplay();
+            }
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < totalQuestions) {
+                currentQuestion++;
+                updateQuestionDisplay();
+            }
+        }
+
+        function downloadPDF() {
+            if (loadedQuestions.length === 0) {
+                alert('Keine Fragen zum Exportieren gefunden.');
+                return;
+            }
+
+            // Create a container for the PDF content
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px';
+            pdfContainer.id = 'pdfContainer';
+
+            // Include CSS styles in the pdfContainer
+            const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
+            styles.forEach(style => {
+                if (style.tagName.toLowerCase() === 'style') {
+                    const styleClone = document.createElement('style');
+                    styleClone.textContent = style.textContent;
+                    pdfContainer.appendChild(styleClone);
+                } else if (style.tagName.toLowerCase() === 'link') {
+                    const linkClone = document.createElement('link');
+                    linkClone.rel = 'stylesheet';
+                    linkClone.href = style.href;
+                    pdfContainer.appendChild(linkClone);
+                }
+            });
+
