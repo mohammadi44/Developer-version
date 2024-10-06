@@ -129,13 +129,13 @@
         .nav-buttons.left-buttons {
             position: absolute;
             left: 20px;
+            display: flex;
+            gap: 10px; /* Adjust the gap as needed */
         }
 
         .nav-buttons.right-buttons {
             position: absolute;
             right: 20px;
-            display: flex;
-            gap: 10px; /* Adjust the gap as needed */
         }
 
         .current-question {
@@ -280,11 +280,11 @@
     <div class="navigation">
         <div class="nav-buttons left-buttons">
             <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
+            <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
+            <button id="downloadPdfBtn" onclick="downloadPdf()" style="display: none;">PDF herunterladen</button>
         </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons right-buttons">
-            <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
-            <button id="downloadPdfBtn" onclick="downloadPdf()" style="display: none;">PDF herunterladen</button>
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
             <button id="nextBtn" onclick="nextQuestion()">Nächste</button>
         </div>
@@ -401,6 +401,7 @@
 
             // Show only the "Zurück zu den Links" button
             document.getElementById('firstQuestionBtn').style.display = 'none';
+            document.getElementById('downloadPdfBtn').style.display = 'none';
             document.getElementById('prevBtn').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('questionNumber').style.display = 'none';
