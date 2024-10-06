@@ -9,8 +9,9 @@
     <!-- Load MathJax for rendering LaTeX equations -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <!-- Include the html2pdf.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+    <!-- Include jsPDF and html2canvas libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
         /* Your existing styles */
@@ -352,7 +353,9 @@
                     } else {
                         updateQuestionDisplay();
                         bindButtonEvents();
-                        MathJax.typesetPromise();
+                        MathJax.typesetPromise().then(() => {
+                            // After MathJax has finished rendering
+                        });
                         document.getElementById('firstQuestionBtn').style.display = 'inline-block';
                         document.getElementById('prevBtn').style.display = 'inline-block';
                         document.getElementById('nextBtn').style.display = 'inline-block';
@@ -475,7 +478,7 @@
             }
         }
 
-        function downloadPDF() {
+        async function downloadPDF() {
             if (loadedQuestions.length === 0) {
                 alert('Keine Fragen zum Exportieren gefunden.');
                 return;
@@ -486,21 +489,6 @@
             pdfContainer.style.position = 'absolute';
             pdfContainer.style.left = '-9999px';
             pdfContainer.id = 'pdfContainer';
-
-            // Include CSS styles in the pdfContainer
-            const styles = document.querySelectorAll('style, link[rel="stylesheet"]');
-            styles.forEach(style => {
-                if (style.tagName.toLowerCase() === 'style') {
-                    const styleClone = document.createElement('style');
-                    styleClone.textContent = style.textContent;
-                    pdfContainer.appendChild(styleClone);
-                } else if (style.tagName.toLowerCase() === 'link') {
-                    const linkClone = document.createElement('link');
-                    linkClone.rel = 'stylesheet';
-                    linkClone.href = style.href;
-                    pdfContainer.appendChild(linkClone);
-                }
-            });
 
             // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
@@ -542,21 +530,32 @@
             document.body.appendChild(pdfContainer);
 
             // Wait for MathJax to finish typesetting
-            MathJax.typesetPromise([pdfContainer]).then(() => {
-                // Use html2pdf to generate the PDF
-                const opt = {
-                    margin:       1,
-                    filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2, useCORS: true },
-                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
-                };
+            await MathJax.typesetPromise([pdfContainer]);
 
-                html2pdf().set(opt).from(pdfContainer).save().then(() => {
-                    // Remove the temporary container
-                    document.body.removeChild(pdfContainer);
-                });
+            // Use html2canvas to render the content
+            const canvas = await html2canvas(pdfContainer, {
+                scale: 2,
+                useCORS: true
             });
+
+            // Create jsPDF instance
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'pt', 'a4');
+
+            // Calculate dimensions
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = pdf.getImageProperties(imgData);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            // Add image to PDF
+            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+
+            // Save the PDF
+            pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
+
+            // Clean up
+            document.body.removeChild(pdfContainer);
         }
 
         window.onload = function() {
