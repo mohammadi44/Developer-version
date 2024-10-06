@@ -494,6 +494,7 @@
             pdfContainer.style.fontSize = '18px'; // Increase the font size as desired
             pdfContainer.style.lineHeight = '1.5'; // Optional: Increase line height for better readability
             pdfContainer.style.maxWidth = '800px'; // Optional: Set a max-width for the content
+            pdfContainer.style.padding = '20px'; // Optional: Add padding
 
             // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
@@ -537,28 +538,53 @@
             // Wait for MathJax to finish typesetting
             await MathJax.typesetPromise([pdfContainer]);
 
+            // Get the dimensions of the A4 page in pixels at 96 DPI
+            const a4Width = 595.28; // Width of A4 in points (1 point = 1/72 inch)
+            const a4Height = 841.89; // Height of A4 in points
+
             // Use html2canvas to render the content
             const canvas = await html2canvas(pdfContainer, {
                 scale: 2,
                 useCORS: true,
                 scrollX: -window.scrollX,
                 scrollY: -window.scrollY,
-                windowWidth: document.documentElement.offsetWidth,
-                windowHeight: document.documentElement.offsetHeight
+                width: pdfContainer.scrollWidth,
+                height: pdfContainer.scrollHeight,
+                windowWidth: pdfContainer.scrollWidth,
+                windowHeight: pdfContainer.scrollHeight
             });
+
+            // Calculate the number of pages needed
+            const imgWidth = a4Width;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            const pageHeight = a4Height;
+            let remainingHeight = imgHeight;
+            let position = 0;
 
             // Create jsPDF instance
             const { jsPDF } = window.jspdf;
             const pdf = new jsPDF('p', 'pt', 'a4');
 
-            // Calculate dimensions
-            const imgData = canvas.toDataURL('image/png');
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            // Split the canvas into multiple pages
+            while (remainingHeight > 0) {
+                const canvasPage = document.createElement('canvas');
+                canvasPage.width = canvas.width;
+                canvasPage.height = canvas.height;
 
-            // Add image to PDF
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                const context = canvasPage.getContext('2d');
+                context.drawImage(canvas, 0, position, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
+
+                const imgData = canvasPage.toDataURL('image/png');
+
+                if (position > 0) {
+                    pdf.addPage();
+                }
+
+                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+
+                remainingHeight -= pageHeight;
+                position += pageHeight;
+            }
 
             // Save the PDF
             pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
