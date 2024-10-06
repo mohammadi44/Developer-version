@@ -6,18 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHY1 Interactive Questions</title>
 
-    <!-- MathJax Configuration for SVG Output -->
-    <script>
-        window.MathJax = {
-            loader: {load: ['input/tex', 'output/svg']},
-            tex: {packages: {'[+]': ['base']}},
-            svg: {fontCache: 'global'}
-        };
-    </script>
-    <!-- Load MathJax for rendering LaTeX equations with SVG output -->
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
-    <!-- Include html2pdf.js library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Load MathJax for rendering LaTeX equations -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
     <style>
         /* Existing styles */
@@ -250,20 +240,6 @@
                 /* Removed margin-top: -20px; */
             }
         }
-
-        /* Styles for PDF content */
-        #pdfContent {
-            font-family: Arial, sans-serif;
-            color: black;
-        }
-
-        #pdfContent h1, #pdfContent h2, #pdfContent h3 {
-            color: black;
-        }
-
-        #pdfContent img {
-            max-width: 100%;
-        }
     </style>
 </head>
 <body class="showing-links">
@@ -296,9 +272,6 @@
     <!-- Message when week content is missing -->
     <div id="missingWeekMessage" class="missing-week-message"></div>
 
-    <!-- Hidden div for PDF content -->
-    <div id="pdfContent" style="display:none;"></div>
-
     <!-- Navigation with centered question number -->
     <div class="navigation">
         <div class="nav-buttons left-buttons">
@@ -307,7 +280,6 @@
         </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons right-buttons">
-            <button id="pdfBtn" onclick="generatePDF()">PDF herunterladen</button>
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
             <button id="nextBtn" onclick="nextQuestion()">Nächste</button>
         </div>
@@ -383,20 +355,19 @@
                         bindButtonEvents();
 
                         // Ensure MathJax processes any equations
-                        MathJax.typesetPromise().then(() => {
-                            // Show navigation buttons
-                            document.getElementById('firstQuestionBtn').style.display = 'inline-block';
-                            document.getElementById('prevBtn').style.display = 'inline-block';
-                            document.getElementById('nextBtn').style.display = 'inline-block';
-                            document.getElementById('pdfBtn').style.display = 'inline-block';
-                            document.getElementById('questionNumber').style.display = 'inline-block';
+                        MathJax.typesetPromise();
 
-                            // Hide missing week message
-                            document.getElementById('missingWeekMessage').style.display = 'none';
+                        // Show navigation buttons
+                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
+                        document.getElementById('prevBtn').style.display = 'inline-block';
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        document.getElementById('questionNumber').style.display = 'inline-block';
 
-                            // Show question box
-                            document.getElementById('weekContent').style.display = 'block';
-                        });
+                        // Hide missing week message
+                        document.getElementById('missingWeekMessage').style.display = 'none';
+
+                        // Show question box
+                        document.getElementById('weekContent').style.display = 'block';
                     }
                 })
                 .catch(error => {
@@ -426,7 +397,6 @@
             document.getElementById('firstQuestionBtn').style.display = 'none';
             document.getElementById('prevBtn').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
-            document.getElementById('pdfBtn').style.display = 'none';
             document.getElementById('questionNumber').style.display = 'none';
 
             // Ensure the navigation bar is visible
@@ -537,78 +507,6 @@
                 currentQuestion++;
                 updateQuestionDisplay();
             }
-        }
-
-        function generatePDF() {
-            let weekNumber = currentWeek;
-
-            fetch(`Week${weekNumber}_questions.html`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('File not found');
-                    }
-                    return response.text();
-                })
-                .then(data => {
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(data, 'text/html');
-
-                    const questions = doc.querySelectorAll('h2[id^="question"]');
-                    let pdfHTML = '<div>';
-
-                    // Assemble questions and hints
-                    questions.forEach((question, index) => {
-                        const hint = doc.querySelector(`#hint-${index + 1}`);
-
-                        pdfHTML += `<h2>Aufgabe ${index + 1}</h2>`;
-                        pdfHTML += question.nextElementSibling ? question.nextElementSibling.outerHTML : '';
-                        if (hint && hint.nextElementSibling) {
-                            pdfHTML += `<h3>Hinweis</h3>`;
-                            pdfHTML += hint.nextElementSibling.outerHTML;
-                        }
-                    });
-
-                    // Separator between questions and solutions
-                    pdfHTML += '<h1 style="page-break-before: always;">Lösungen</h1>';
-
-                    // Assemble solutions
-                    questions.forEach((question, index) => {
-                        const solution = doc.querySelector(`#solution-${index + 1}`);
-
-                        pdfHTML += `<h2>Lösung zu Aufgabe ${index + 1}</h2>`;
-                        if (solution && solution.nextElementSibling) {
-                            pdfHTML += solution.nextElementSibling.outerHTML;
-                        }
-                    });
-
-                    pdfHTML += '</div>';
-
-                    // Set the content in the hidden div
-                    const pdfContentDiv = document.getElementById('pdfContent');
-                    pdfContentDiv.innerHTML = pdfHTML;
-                    pdfContentDiv.style.display = 'block'; // Make it visible temporarily for MathJax rendering
-
-                    // Ensure MathJax processes the content
-                    MathJax.typesetPromise([pdfContentDiv]).then(() => {
-                        // Generate the PDF
-                        const opt = {
-                            margin:       0.5,
-                            filename:     `Woche${weekNumber}_Inhalt.pdf`,
-                            image:        { type: 'jpeg', quality: 0.98 },
-                            html2canvas:  { scale: 2, useCORS: true },
-                            jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                            pagebreak:    { mode: ['avoid-all', 'css', 'legacy'] }
-                        };
-                        html2pdf().set(opt).from(pdfContentDiv).save().then(() => {
-                            // Hide the pdfContentDiv after generating PDF
-                            pdfContentDiv.style.display = 'none';
-                        });
-                    });
-                })
-                .catch(error => {
-                    console.error('Error generating PDF:', error);
-                    alert('Fehler beim Generieren des PDFs.');
-                });
         }
 
         // Initialize the page
