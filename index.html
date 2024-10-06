@@ -556,18 +556,19 @@
 
             // Append the container to the body
             document.body.appendChild(pdfContainer);
+            pdfContainer.style.display = 'block'; // Ensure the container is visible
 
             // Wait for MathJax to finish typesetting
             await MathJax.typesetPromise([pdfContainer]);
 
             // Use html2pdf.js to generate the PDF
             const opt = {
-                margin:       0.5, // Adjusted margin
+                margin:       0.5,
                 filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
                 image:        { type: 'jpeg', quality: 0.98 },
                 html2canvas:  { scale: 2, useCORS: true },
                 jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                pagebreak:    { mode: ['css', 'legacy'] } // Use CSS to control page breaks
+                pagebreak:    { mode: ['css', 'legacy'] }
             };
 
             html2pdf().set(opt).from(pdfContainer).save().then(() => {
