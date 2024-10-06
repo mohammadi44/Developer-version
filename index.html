@@ -268,7 +268,7 @@
         <h2 id="weekTitle">Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
         <!-- Add Download PDF Button -->
-        <button id="downloadPdfBtn" onclick="downloadPdf()" style="margin-top: 20px; display: none;">Download PDF</button>
+        
     </div>
 
     <!-- Message when week content is missing -->
@@ -282,6 +282,7 @@
         </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons right-buttons">
+            <button id="downloadPdfBtn" onclick="downloadPdf()" style="display: none;">PDF herunterladen</button>
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
             <button id="nextBtn" onclick="nextQuestion()">Nächste</button>
         </div>
