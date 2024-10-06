@@ -292,21 +292,6 @@
             // Add titles for other weeks if necessary
         };
 
-        function showQuestions(weekNumber) {
-            currentQuestion = 1;
-            document.getElementById('weekContent').style.display = 'block';
-            document.querySelector('.navigation').style.display = 'flex';
-            document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
-            document.body.classList.remove('showing-links');
-            document.body.classList.add('showing-questions');
-            document.getElementById('weekContent').classList.remove('content-with-links');
-            document.getElementById('pageTitle').innerText = 'PHY1';
-            document.getElementById('weekTitle').style.display = 'block'; // Show the week title
-            document.getElementById('missingWeekMessage').style.display = 'none';
-            loadQuestions(weekNumber);
-            document.getElementById('downloadPdfBtn').style.display = 'inline-block';
-        }
-
         function loadQuestions(weekNumber) {
             currentWeek = weekNumber;
             document.getElementById('weekTitle').innerText = weekTitles[weekNumber] || 'Physik Grundlagen';
@@ -432,6 +417,33 @@
             element.style.display = element.style.display === 'none' || element.style.display === '' ? 'block' : 'none';
         }
 
+        function showQuestions(weekNumber) {
+            currentQuestion = 1;
+            document.getElementById('weekContent').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
+            document.querySelector('.links').style.display = 'none';
+            document.body.classList.remove('showing-links');
+            document.body.classList.add('showing-questions');
+            document.getElementById('weekContent').classList.remove('content-with-links');
+            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('weekTitle').style.display = 'block';
+            document.getElementById('missingWeekMessage').style.display = 'none';
+            loadQuestions(weekNumber);
+            document.getElementById('downloadPdfBtn').style.display = 'inline-block';
+        }
+
+        function showHomepage() {
+            document.getElementById('weekContent').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.links').style.display = 'flex';
+            document.body.classList.remove('showing-questions');
+            document.body.classList.add('showing-links');
+            document.getElementById('weekContent').classList.add('content-with-links');
+            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('missingWeekMessage').style.display = 'none';
+            document.getElementById('downloadPdfBtn').style.display = 'none';
+        }
+
         function goToFirstQuestion() {
             currentQuestion = 1;
             updateQuestionDisplay();
@@ -490,3 +502,81 @@
                 }
             });
 
+            // Create a title for the PDF
+            const pdfTitle = document.createElement('h1');
+            pdfTitle.innerText = document.getElementById('weekTitle').innerText + ' - Aufgaben';
+            pdfContainer.appendChild(pdfTitle);
+
+            // Questions first
+            loadedQuestions.forEach((item) => {
+                const questionHeading = document.createElement('h2');
+                questionHeading.innerText = `Aufgabe ${item.questionNumber}`;
+                pdfContainer.appendChild(questionHeading);
+
+                const questionContentDiv = document.createElement('div');
+                questionContentDiv.innerHTML = item.questionContent;
+                questionContentDiv.style.display = 'block';
+                pdfContainer.appendChild(questionContentDiv);
+            });
+
+            // Add a page break
+            const pageBreak = document.createElement('div');
+            pageBreak.style.pageBreakAfter = 'always';
+            pdfContainer.appendChild(pageBreak);
+
+            // Solutions next
+            const solutionsTitle = document.createElement('h1');
+            solutionsTitle.innerText = 'Lösungen';
+            pdfContainer.appendChild(solutionsTitle);
+
+            loadedQuestions.forEach((item) => {
+                const solutionHeading = document.createElement('h2');
+                solutionHeading.innerText = `Aufgabe ${item.questionNumber}`;
+                pdfContainer.appendChild(solutionHeading);
+
+                const solutionContentDiv = document.createElement('div');
+                solutionContentDiv.innerHTML = item.solutionContent;
+                solutionContentDiv.style.display = 'block';
+                pdfContainer.appendChild(solutionContentDiv);
+            });
+
+            // Append the container to the body
+            document.body.appendChild(pdfContainer);
+
+            // Ensure MathJax has typeset the content in pdfContainer
+            MathJax.typesetPromise([pdfContainer]).then(() => {
+                setTimeout(() => {
+                    // Log pdfContainer to verify its content
+                    console.log(pdfContainer);
+
+                    // Use html2pdf to generate the PDF
+                    const opt = {
+                        margin:       1,
+                        filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
+                        image:        { type: 'jpeg', quality: 0.98 },
+                        html2canvas:  { scale: 2, useCORS: true },
+                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                    };
+
+                    html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                        // Remove the temporary container
+                        document.body.removeChild(pdfContainer);
+                    });
+                }, 3000); // Increased delay to 3 seconds
+            }).catch(error => {
+                console.error('Error in MathJax rendering:', error);
+            });
+        }
+
+        window.onload = function() {
+            document.querySelector('.navigation').style.display = 'none';
+            document.getElementById('weekContent').style.display = 'none';
+            document.body.classList.add('showing-links');
+            document.getElementById('weekContent').classList.add('content-with-links');
+            document.getElementById('missingWeekMessage').style.display = 'none';
+            document.getElementById('downloadPdfBtn').style.display = 'none';
+        }
+    </script>
+
+</body>
+</html>
