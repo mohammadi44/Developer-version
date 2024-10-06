@@ -9,9 +9,8 @@
     <!-- Load MathJax for rendering LaTeX equations -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
-    <!-- Include jsPDF and html2canvas libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Include the html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
     <style>
         /* Your existing styles */
@@ -170,6 +169,19 @@
         .missing-week-message div {
             font-size: 24px;
             font-weight: bold;
+        }
+
+        /* Styles to control page breaks in PDF */
+        .pdf-page {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
+        /* Optional: Adjust margins for the PDF content */
+        #pdfContainer {
+            margin: 0;
+            padding: 20px;
+            max-width: 800px;
         }
 
         @media (max-width: 800px) {
@@ -490,11 +502,11 @@
             pdfContainer.style.left = '-9999px';
             pdfContainer.id = 'pdfContainer';
 
-            // Apply a larger font size for the PDF content
-            pdfContainer.style.fontSize = '18px'; // Increase the font size as desired
-            pdfContainer.style.lineHeight = '1.5'; // Optional: Increase line height for better readability
-            pdfContainer.style.maxWidth = '800px'; // Optional: Set a max-width for the content
-            pdfContainer.style.padding = '20px'; // Optional: Add padding
+            // Apply styles
+            pdfContainer.style.fontSize = '18px';
+            pdfContainer.style.lineHeight = '1.5';
+            pdfContainer.style.maxWidth = '800px';
+            pdfContainer.style.padding = '20px';
 
             // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
@@ -503,16 +515,21 @@
 
             // Questions first
             loadedQuestions.forEach((item) => {
+                const questionSection = document.createElement('div');
+                questionSection.className = 'pdf-page'; // Apply the class to control page breaks
+
                 const questionHeading = document.createElement('h2');
                 questionHeading.innerText = `Aufgabe ${item.questionNumber}`;
-                pdfContainer.appendChild(questionHeading);
+                questionSection.appendChild(questionHeading);
 
                 const questionContentDiv = document.createElement('div');
                 questionContentDiv.innerHTML = item.questionContent;
-                pdfContainer.appendChild(questionContentDiv);
+                questionSection.appendChild(questionContentDiv);
+
+                pdfContainer.appendChild(questionSection);
             });
 
-            // Add a page break
+            // Add a page break between questions and solutions
             const pageBreak = document.createElement('div');
             pageBreak.style.pageBreakAfter = 'always';
             pdfContainer.appendChild(pageBreak);
@@ -523,13 +540,18 @@
             pdfContainer.appendChild(solutionsTitle);
 
             loadedQuestions.forEach((item) => {
+                const solutionSection = document.createElement('div');
+                solutionSection.className = 'pdf-page'; // Apply the class to control page breaks
+
                 const solutionHeading = document.createElement('h2');
                 solutionHeading.innerText = `Aufgabe ${item.questionNumber}`;
-                pdfContainer.appendChild(solutionHeading);
+                solutionSection.appendChild(solutionHeading);
 
                 const solutionContentDiv = document.createElement('div');
                 solutionContentDiv.innerHTML = item.solutionContent;
-                pdfContainer.appendChild(solutionContentDiv);
+                solutionSection.appendChild(solutionContentDiv);
+
+                pdfContainer.appendChild(solutionSection);
             });
 
             // Append the container to the body
@@ -538,59 +560,20 @@
             // Wait for MathJax to finish typesetting
             await MathJax.typesetPromise([pdfContainer]);
 
-            // Get the dimensions of the A4 page in pixels at 96 DPI
-            const a4Width = 595.28; // Width of A4 in points (1 point = 1/72 inch)
-            const a4Height = 841.89; // Height of A4 in points
+            // Use html2pdf.js to generate the PDF
+            const opt = {
+                margin:       0.5, // Adjusted margin
+                filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                pagebreak:    { mode: ['css', 'legacy'] } // Use CSS to control page breaks
+            };
 
-            // Use html2canvas to render the content
-            const canvas = await html2canvas(pdfContainer, {
-                scale: 2,
-                useCORS: true,
-                scrollX: -window.scrollX,
-                scrollY: -window.scrollY,
-                width: pdfContainer.scrollWidth,
-                height: pdfContainer.scrollHeight,
-                windowWidth: pdfContainer.scrollWidth,
-                windowHeight: pdfContainer.scrollHeight
+            html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                // Remove the temporary container
+                document.body.removeChild(pdfContainer);
             });
-
-            // Calculate the number of pages needed
-            const imgWidth = a4Width;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            const pageHeight = a4Height;
-            let remainingHeight = imgHeight;
-            let position = 0;
-
-            // Create jsPDF instance
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'pt', 'a4');
-
-            // Split the canvas into multiple pages
-            while (remainingHeight > 0) {
-                const canvasPage = document.createElement('canvas');
-                canvasPage.width = canvas.width;
-                canvasPage.height = canvas.height;
-
-                const context = canvasPage.getContext('2d');
-                context.drawImage(canvas, 0, position, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-
-                const imgData = canvasPage.toDataURL('image/png');
-
-                if (position > 0) {
-                    pdf.addPage();
-                }
-
-                pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-
-                remainingHeight -= pageHeight;
-                position += pageHeight;
-            }
-
-            // Save the PDF
-            pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
-
-            // Clean up
-            document.body.removeChild(pdfContainer);
         }
 
         window.onload = function() {
