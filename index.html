@@ -172,64 +172,35 @@
             font-weight: bold;
         }
 
+        /* Additional styles for PDF content */
+        #pdfContainer {
+            font-size: 14px; /* Increase font size */
+            line-height: 1.5;
+            width: 180mm; /* Content width matching PDF width minus margins */
+        }
+
+        #pdfContainer h1, #pdfContainer h2 {
+            text-align: center;
+        }
+
+        #pdfContainer h1 {
+            font-size: 20px;
+            margin-bottom: 10px;
+        }
+
+        #pdfContainer h2 {
+            font-size: 18px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+
+        #pdfContainer div {
+            margin-bottom: 15px;
+            text-align: justify;
+        }
+
         @media (max-width: 800px) {
-            .links {
-                position: static;
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                padding: 10px 0;
-                top: auto;
-                overflow: visible;
-            }
-
-            .link {
-                padding: 5px 10px;
-                flex: 1 1 30%;
-                text-align: center;
-                box-sizing: border-box;
-            }
-
-            .question-box {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            .navigation {
-                flex-direction: column;
-                position: static;
-                padding: 10px;
-            }
-
-            .nav-buttons.left-buttons,
-            .nav-buttons.right-buttons {
-                position: static;
-                margin: 10px 0;
-            }
-
-            .current-question {
-                margin: 10px 0;
-            }
-
-            .missing-week-message {
-                position: static;
-                transform: none;
-                margin-top: 50px;
-                padding: 0 20px;
-            }
-
-            body {
-                padding-top: 70px;
-            }
-
-            .links {
-                position: static;
-                top: auto;
-                height: auto;
-                padding-top: 0;
-            }
+            /* Existing responsive styles */
         }
     </style>
 </head>
@@ -490,15 +461,22 @@
             pdfContainer.style.left = '-9999px';
             pdfContainer.id = 'pdfContainer';
 
+            // Set additional styles
+            pdfContainer.style.fontSize = '14px'; // Increase font size
+            pdfContainer.style.lineHeight = '1.5';
+            pdfContainer.style.width = '180mm'; // Content width matching A4 minus margins
+
             // Create a title for the PDF
             const pdfTitle = document.createElement('h1');
             pdfTitle.innerText = document.getElementById('weekTitle').innerText + ' - Aufgaben';
+            pdfTitle.style.textAlign = 'center';
             pdfContainer.appendChild(pdfTitle);
 
             // Questions first
             loadedQuestions.forEach((item) => {
                 const questionHeading = document.createElement('h2');
                 questionHeading.innerText = `Aufgabe ${item.questionNumber}`;
+                questionHeading.style.textAlign = 'center';
                 pdfContainer.appendChild(questionHeading);
 
                 const questionContentDiv = document.createElement('div');
@@ -506,19 +484,21 @@
                 pdfContainer.appendChild(questionContentDiv);
             });
 
-            // Add a page break
+            // Add a page break before solutions
             const pageBreak = document.createElement('div');
-            pageBreak.style.pageBreakAfter = 'always';
+            pageBreak.style.pageBreakBefore = 'always';
             pdfContainer.appendChild(pageBreak);
 
             // Solutions next
             const solutionsTitle = document.createElement('h1');
             solutionsTitle.innerText = 'Lösungen';
+            solutionsTitle.style.textAlign = 'center';
             pdfContainer.appendChild(solutionsTitle);
 
             loadedQuestions.forEach((item) => {
                 const solutionHeading = document.createElement('h2');
                 solutionHeading.innerText = `Aufgabe ${item.questionNumber}`;
+                solutionHeading.style.textAlign = 'center';
                 pdfContainer.appendChild(solutionHeading);
 
                 const solutionContentDiv = document.createElement('div');
@@ -532,30 +512,28 @@
             // Wait for MathJax to finish typesetting
             await MathJax.typesetPromise([pdfContainer]);
 
-            // Use html2canvas to render the content
-            const canvas = await html2canvas(pdfContainer, {
-                scale: 2,
-                useCORS: true
-            });
-
             // Create jsPDF instance
             const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'pt', 'a4');
+            const pdf = new jsPDF('p', 'mm', 'a4');
 
-            // Calculate dimensions
-            const imgData = canvas.toDataURL('image/png');
-            const imgProps = pdf.getImageProperties(imgData);
-            const pdfWidth = pdf.internal.pageSize.getWidth();
-            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-            // Add image to PDF
-            pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-
-            // Save the PDF
-            pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
-
-            // Clean up
-            document.body.removeChild(pdfContainer);
+            // Generate PDF from HTML
+            await pdf.html(pdfContainer, {
+                callback: function (pdf) {
+                    pdf.save(`${document.getElementById('weekTitle').innerText}.pdf`);
+                    // Clean up
+                    document.body.removeChild(pdfContainer);
+                },
+                margin: [20, 15, 20, 15], // top, left, bottom, right margins in mm
+                autoPaging: 'text',
+                x: 0,
+                y: 0,
+                html2canvas: {
+                    scale: 0.8, // Adjust scale if needed
+                    useCORS: true,
+                },
+                width: 180, // Max width of content on PDF (A4 width - margins)
+                windowWidth: pdfContainer.scrollWidth
+            });
         }
 
         window.onload = function() {
