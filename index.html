@@ -6,8 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PHY1 Interactive Questions</title>
 
-    <!-- Load MathJax for rendering LaTeX equations -->
-    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- MathJax Configuration for SVG Output -->
+    <script>
+        window.MathJax = {
+            loader: {load: ['input/tex', 'output/svg']},
+            tex: {packages: {'[+]': ['base']}},
+            svg: {fontCache: 'global'}
+        };
+    </script>
+    <!-- Load MathJax for rendering LaTeX equations with SVG output -->
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
     <!-- Include html2pdf.js library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 
@@ -299,7 +307,7 @@
         </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons right-buttons">
-            <button id="pdfBtn" onclick="generatePDF()">Download PDF</button>
+            <button id="pdfBtn" onclick="generatePDF()">PDF herunterladen</button>
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
             <button id="nextBtn" onclick="nextQuestion()">Nächste</button>
         </div>
@@ -375,20 +383,20 @@
                         bindButtonEvents();
 
                         // Ensure MathJax processes any equations
-                        MathJax.typesetPromise();
+                        MathJax.typesetPromise().then(() => {
+                            // Show navigation buttons
+                            document.getElementById('firstQuestionBtn').style.display = 'inline-block';
+                            document.getElementById('prevBtn').style.display = 'inline-block';
+                            document.getElementById('nextBtn').style.display = 'inline-block';
+                            document.getElementById('pdfBtn').style.display = 'inline-block';
+                            document.getElementById('questionNumber').style.display = 'inline-block';
 
-                        // Show navigation buttons
-                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
-                        document.getElementById('prevBtn').style.display = 'inline-block';
-                        document.getElementById('nextBtn').style.display = 'inline-block';
-                        document.getElementById('pdfBtn').style.display = 'inline-block';
-                        document.getElementById('questionNumber').style.display = 'inline-block';
+                            // Hide missing week message
+                            document.getElementById('missingWeekMessage').style.display = 'none';
 
-                        // Hide missing week message
-                        document.getElementById('missingWeekMessage').style.display = 'none';
-
-                        // Show question box
-                        document.getElementById('weekContent').style.display = 'block';
+                            // Show question box
+                            document.getElementById('weekContent').style.display = 'block';
+                        });
                     }
                 })
                 .catch(error => {
@@ -585,7 +593,7 @@
                         // Generate the PDF
                         const opt = {
                             margin:       0.5,
-                            filename:     `Week${weekNumber}_Content.pdf`,
+                            filename:     `Woche${weekNumber}_Inhalt.pdf`,
                             image:        { type: 'jpeg', quality: 0.98 },
                             html2canvas:  { scale: 2, useCORS: true },
                             jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
