@@ -9,6 +9,9 @@
     <!-- Load MathJax for rendering LaTeX equations -->
     <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 
+    <!-- Include the html2pdf.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.3/html2pdf.bundle.min.js"></script>
+
     <style>
         /* Existing styles */
         body {
@@ -272,11 +275,12 @@
     <!-- Message when week content is missing -->
     <div id="missingWeekMessage" class="missing-week-message"></div>
 
-    <!-- Navigation with centered question number -->
+    <!-- Navigation with centered question number and PDF button -->
     <div class="navigation">
         <div class="nav-buttons left-buttons">
             <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
             <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
+            <button id="downloadPdfBtn" onclick="downloadPDF()" style="display:none;">PDF herunterladen</button>
         </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons right-buttons">
@@ -398,6 +402,7 @@
             document.getElementById('prevBtn').style.display = 'none';
             document.getElementById('nextBtn').style.display = 'none';
             document.getElementById('questionNumber').style.display = 'none';
+            document.getElementById('downloadPdfBtn').style.display = 'none'; // Hide the PDF button
 
             // Ensure the navigation bar is visible
             document.querySelector('.navigation').style.display = 'flex';
@@ -458,6 +463,9 @@
             document.getElementById('missingWeekMessage').style.display = 'none';
 
             loadQuestions(weekNumber);
+
+            // Show the PDF download button
+            document.getElementById('downloadPdfBtn').style.display = 'inline-block';
         }
 
         // Function to return to the homepage
@@ -475,6 +483,9 @@
 
             // Hide missing week message
             document.getElementById('missingWeekMessage').style.display = 'none';
+
+            // Hide the PDF download button
+            document.getElementById('downloadPdfBtn').style.display = 'none';
         }
 
         // Function to go back to the first question
@@ -509,6 +520,85 @@
             }
         }
 
+        // Function to download the PDF
+        function downloadPDF() {
+            // Create a container for the PDF content
+            const pdfContainer = document.createElement('div');
+            pdfContainer.style.position = 'absolute';
+            pdfContainer.style.left = '-9999px'; // Hide it off-screen
+            pdfContainer.id = 'pdfContainer';
+
+            // Create a title for the PDF
+            const pdfTitle = document.createElement('h1');
+            pdfTitle.innerText = document.getElementById('weekTitle').innerText + ' - Aufgaben';
+            pdfContainer.appendChild(pdfTitle);
+
+            // Questions first
+            const totalQuestions = document.querySelectorAll('.question-frame').length;
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                // Clone the question content
+                const questionElement = document.getElementById(`question${i}`).cloneNode(true);
+
+                // Remove hint and solution buttons and content
+                const buttons = questionElement.querySelector('.buttons');
+                if (buttons) buttons.parentNode.removeChild(buttons);
+
+                const hintElement = questionElement.querySelector('.hint-frame');
+                if (hintElement) hintElement.parentNode.removeChild(hintElement);
+
+                const solutionElement = questionElement.querySelector('.solution-frame');
+                if (solutionElement) solutionElement.parentNode.removeChild(solutionElement);
+
+                pdfContainer.appendChild(questionElement);
+            }
+
+            // Add a page break
+            const pageBreak = document.createElement('div');
+            pageBreak.style.pageBreakAfter = 'always';
+            pdfContainer.appendChild(pageBreak);
+
+            // Solutions next
+            const solutionsTitle = document.createElement('h1');
+            solutionsTitle.innerText = 'Lösungen';
+            pdfContainer.appendChild(solutionsTitle);
+
+            for (let i = 1; i <= totalQuestions; i++) {
+                // Clone the question heading
+                const questionHeading = document.createElement('h2');
+                questionHeading.innerText = `Aufgabe ${i}`;
+                pdfContainer.appendChild(questionHeading);
+
+                // Clone the solution content
+                const solutionElement = document.getElementById(`question${i}`).querySelector('.solution-frame').cloneNode(true);
+
+                // Ensure the solution is displayed
+                solutionElement.style.display = 'block';
+
+                pdfContainer.appendChild(solutionElement);
+            }
+
+            // Append the container to the body
+            document.body.appendChild(pdfContainer);
+
+            // Ensure MathJax has typeset the content in pdfContainer
+            MathJax.typesetPromise([pdfContainer]).then(() => {
+                // Use html2pdf to generate the PDF
+                const opt = {
+                    margin:       1,
+                    filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                html2pdf().set(opt).from(pdfContainer).save().then(() => {
+                    // Remove the temporary container
+                    document.body.removeChild(pdfContainer);
+                });
+            });
+        }
+
         // Initialize the page
         window.onload = function() {
             document.querySelector('.navigation').style.display = 'none';
@@ -519,6 +609,9 @@
 
             // Hide missing week message
             document.getElementById('missingWeekMessage').style.display = 'none';
+
+            // Hide the PDF download button
+            document.getElementById('downloadPdfBtn').style.display = 'none';
         }
     </script>
 
