@@ -352,15 +352,14 @@
                     } else {
                         updateQuestionDisplay();
                         bindButtonEvents();
-                        MathJax.typesetPromise().then(() => {
-                            document.getElementById('firstQuestionBtn').style.display = 'inline-block';
-                            document.getElementById('prevBtn').style.display = 'inline-block';
-                            document.getElementById('nextBtn').style.display = 'inline-block';
-                            document.getElementById('questionNumber').style.display = 'inline-block';
-                            document.getElementById('missingWeekMessage').style.display = 'none';
-                            document.getElementById('weekContent').style.display = 'block';
-                            document.getElementById('downloadPdfBtn').style.display = 'inline-block';
-                        });
+                        MathJax.typesetPromise();
+                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
+                        document.getElementById('prevBtn').style.display = 'inline-block';
+                        document.getElementById('nextBtn').style.display = 'inline-block';
+                        document.getElementById('questionNumber').style.display = 'inline-block';
+                        document.getElementById('missingWeekMessage').style.display = 'none';
+                        document.getElementById('weekContent').style.display = 'block';
+                        document.getElementById('downloadPdfBtn').style.display = 'inline-block';
                     }
                 })
                 .catch(error => {
@@ -516,7 +515,6 @@
 
                 const questionContentDiv = document.createElement('div');
                 questionContentDiv.innerHTML = item.questionContent;
-                questionContentDiv.style.display = 'block';
                 pdfContainer.appendChild(questionContentDiv);
             });
 
@@ -537,16 +535,15 @@
 
                 const solutionContentDiv = document.createElement('div');
                 solutionContentDiv.innerHTML = item.solutionContent;
-                solutionContentDiv.style.display = 'block';
                 pdfContainer.appendChild(solutionContentDiv);
             });
 
             // Append the container to the body
             document.body.appendChild(pdfContainer);
 
-            // Ensure MathJax has typeset the content in pdfContainer
+            // Wait for MathJax to finish typesetting
             MathJax.typesetPromise([pdfContainer]).then(() => {
-                // Wait for MathJax to finish rendering
+                // Use html2pdf to generate the PDF
                 const opt = {
                     margin:       1,
                     filename:     `${document.getElementById('weekTitle').innerText}.pdf`,
@@ -559,8 +556,6 @@
                     // Remove the temporary container
                     document.body.removeChild(pdfContainer);
                 });
-            }).catch(error => {
-                console.error('Error in MathJax rendering:', error);
             });
         }
 
