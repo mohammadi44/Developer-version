@@ -134,6 +134,8 @@
         .nav-buttons.right-buttons {
             position: absolute;
             right: 20px;
+            display: flex;
+            gap: 10px; /* Adjust the gap as needed */
         }
 
         .current-question {
@@ -278,14 +280,10 @@
     <div class="navigation">
         <div class="nav-buttons left-buttons">
             <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
-            <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
-            
-            
-            <button id="homeBtn" onclick="showHomepage()">Zurück zu den Links</button>
-            
-            </div>
+        </div>
         <span id="questionNumber" class="current-question">1/5</span>
         <div class="nav-buttons right-buttons">
+            <button id="firstQuestionBtn" onclick="goToFirstQuestion()">Zurück zur ersten Frage</button>
             <button id="downloadPdfBtn" onclick="downloadPdf()" style="display: none;">PDF herunterladen</button>
             <button id="prevBtn" onclick="prevQuestion()" disabled>Vorherige</button>
             <button id="nextBtn" onclick="nextQuestion()">Nächste</button>
