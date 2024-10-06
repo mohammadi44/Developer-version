@@ -292,6 +292,21 @@
             // Add titles for other weeks if necessary
         };
 
+        function showQuestions(weekNumber) {
+            currentQuestion = 1;
+            document.getElementById('weekContent').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
+            document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
+            document.body.classList.remove('showing-links');
+            document.body.classList.add('showing-questions');
+            document.getElementById('weekContent').classList.remove('content-with-links');
+            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('weekTitle').style.display = 'block'; // Show the week title
+            document.getElementById('missingWeekMessage').style.display = 'none';
+            loadQuestions(weekNumber);
+            document.getElementById('downloadPdfBtn').style.display = 'inline-block';
+        }
+
         function loadQuestions(weekNumber) {
             currentWeek = weekNumber;
             document.getElementById('weekTitle').innerText = weekTitles[weekNumber] || 'Physik Grundlagen';
@@ -320,59 +335,4 @@
                         const solution = doc.querySelector(`#solution-${index + 1}`);
 
                         const questionContent = question.nextElementSibling ? question.nextElementSibling.outerHTML : '';
-                        const hintContent = hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : '';
-                        const solutionContent = solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : '';
-
-                        // Store the question and solution content
-                        loadedQuestions.push({
-                            questionNumber: index + 1,
-                            questionContent: questionContent,
-                            solutionContent: solutionContent
-                        });
-
-                        questionHTML += `
-                            <div class="question-frame" id="${questionId}" style="display:none;">
-                                <h2>Aufgabe ${index + 1}</h2>
-                                ${questionContent}
-                                <div class="buttons">
-                                    <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
-                                    <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
-                                </div>
-                                <div id="${hintId}" class="hint-frame hint">${hintContent}</div>
-                                <div id="${solutionId}" class="solution-frame solution">${solutionContent}</div>
-                            </div>
-                        `;
-                    });
-
-                    document.getElementById('questionsContainer').innerHTML = questionHTML;
-                    totalQuestions = questions.length;
-
-                    if (totalQuestions === 0) {
-                        handleMissingWeek(weekNumber);
-                    } else {
-                        updateQuestionDisplay();
-                        bindButtonEvents();
-                        MathJax.typesetPromise();
-                        document.getElementById('firstQuestionBtn').style.display = 'inline-block';
-                        document.getElementById('prevBtn').style.display = 'inline-block';
-                        document.getElementById('nextBtn').style.display = 'inline-block';
-                        document.getElementById('questionNumber').style.display = 'inline-block';
-                        document.getElementById('missingWeekMessage').style.display = 'none';
-                        document.getElementById('weekContent').style.display = 'block';
-                        document.getElementById('downloadPdfBtn').style.display = 'inline-block';
-                    }
-                })
-                .catch(error => {
-                    console.error('Error fetching questions:', error);
-                    handleMissingWeek(weekNumber);
-                });
-        }
-
-        function handleMissingWeek(weekNumber) {
-            document.getElementById('pageTitle').innerText = '';
-            document.getElementById('weekTitle').style.display = 'none';
-            document.getElementById('questionsContainer').innerHTML = '';
-            document.getElementById('weekContent').style.display = 'none';
-
-            const missingWeekMessage = document.getElementById('missingWeekMessage');
-           
+                        const hintContent = hint &&
