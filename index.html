@@ -242,20 +242,6 @@
                 /* Removed margin-top: -20px; */
             }
         }
-
-        /* Additional styles for images and captions */
-        .caption {
-            text-align: center;
-            font-style: italic;
-            margin-top: 5px;
-        }
-
-        .question-frame img {
-            display: block;
-            margin: 0 auto;
-            max-width: 100%;
-            height: auto;
-        }
     </style>
 </head>
 <body class="showing-links">
@@ -318,35 +304,6 @@
             // Add titles for other weeks if necessary
         };
 
-        // Function to replace LaTeX figures with HTML images
-        function replaceFigures(data) {
-            const figureRegex = /\\begin\{figure\}.*?\\end\{figure\}/gs;
-
-            data = data.replace(figureRegex, function(match) {
-                // Extract image filename from \label{...}
-                const labelMatch = match.match(/\\label\{(.*?)\}/);
-                // Extract caption from \caption{...}
-                const captionMatch = match.match(/\\caption\{(.*?)\}/);
-
-                let imgTag = '';
-                if (labelMatch) {
-                    let imageFilename = labelMatch[1].trim();
-
-                    // Assuming images are in the same directory as the HTML file
-                    imgTag = `<img src="${imageFilename}" alt="Figure">`;
-                } else {
-                    console.warn('No \label found in figure environment.');
-                }
-                if (captionMatch) {
-                    const captionText = captionMatch[1].trim();
-                    imgTag += `<div class="caption">${captionText}</div>`;
-                }
-                return imgTag;
-            });
-
-            return data;
-        }
-
         // Load questions from WeekX_questions.html
         function loadQuestions(weekNumber) {
             currentWeek = weekNumber; // Set the current week
@@ -362,9 +319,6 @@
                     return response.text();
                 })
                 .then(data => {
-                    // Process figures in the data
-                    data = replaceFigures(data);
-
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data, 'text/html');
 
