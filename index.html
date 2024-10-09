@@ -322,6 +322,17 @@
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(data, 'text/html');
 
+                    // **Adjust img src attributes**
+                    const imgElements = doc.querySelectorAll('img');
+
+                    imgElements.forEach(img => {
+                        let src = img.getAttribute('src');
+                        if (src.includes('Figures/')) {
+                            src = src.replace('Figures/', '');
+                            img.setAttribute('src', src);
+                        }
+                    });
+
                     const questions = doc.querySelectorAll('h2[id^="question"]');
                     let questionHTML = '';
 
