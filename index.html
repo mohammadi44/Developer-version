@@ -304,6 +304,54 @@
             // Add titles for other weeks if necessary
         };
 
+        // Function to process content and replace \includegraphics lines
+        function processContent(element) {
+            if (!element) return '';
+            let clone = element.cloneNode(true);
+
+            // Get the innerHTML of the element
+            let contentStr = clone.innerHTML;
+
+            // Regular expression to find \includegraphics lines
+            let regex = /\\includegraphics\[(.*?)\]{(.*?)}/g;
+
+            // Replace \includegraphics lines with <img> tags
+            contentStr = contentStr.replace(regex, function(match, p1, p2) {
+                // p2 is the filename extracted from \includegraphics[...]{filename}
+                return `<img src="${p2}" alt="Figure" style="${parseGraphicsOptions(p1)}">`;
+            });
+
+            // Update the clone's innerHTML
+            clone.innerHTML = contentStr;
+
+            // Return the modified outerHTML
+            return clone.outerHTML;
+        }
+
+        // Function to parse graphics options (e.g., width)
+        function parseGraphicsOptions(optionsStr) {
+            let styleStr = '';
+            // Split the options by commas (in case there are multiple options)
+            let options = optionsStr.split(',');
+            options.forEach(option => {
+                let [key, value] = option.split('=');
+                key = key.trim();
+                value = value.trim();
+                if (key === 'width') {
+                    // Convert LaTeX width to CSS width
+                    if (value.includes('\\textwidth')) {
+                        // Calculate percentage
+                        let percentage = parseFloat(value.replace('\\textwidth', '')) * 100;
+                        styleStr += `width:${percentage}%;`;
+                    } else {
+                        styleStr += `width:${value};`;
+                    }
+                }
+                // Add more option parsing if needed
+            });
+            return styleStr;
+        }
+
         // Load questions from WeekX_questions.html
         function loadQuestions(weekNumber) {
             currentWeek = weekNumber; // Set the current week
@@ -333,16 +381,21 @@
                         const hint = doc.querySelector(`#hint-${index + 1}`);
                         const solution = doc.querySelector(`#solution-${index + 1}`);
 
+                        // Process the question, hint, and solution content
+                        const questionContent = processContent(question.nextElementSibling);
+                        const hintContent = processContent(hint && hint.nextElementSibling);
+                        const solutionContent = processContent(solution && solution.nextElementSibling);
+
                         questionHTML += `
                             <div class="question-frame" id="${questionId}" style="display:none;">
                                 <h2>Aufgabe ${index + 1}</h2>
-                                ${question.nextElementSibling ? question.nextElementSibling.outerHTML : ''}
+                                ${questionContent}
                                 <div class="buttons">
                                     <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
                                     <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
                                 </div>
-                                <div id="${hintId}" class="hint-frame hint">${hint && hint.nextElementSibling ? hint.nextElementSibling.outerHTML : ''}</div>
-                                <div id="${solutionId}" class="solution-frame solution">${solution && solution.nextElementSibling ? solution.nextElementSibling.outerHTML : ''}</div>
+                                <div id="${hintId}" class="hint-frame hint">${hintContent}</div>
+                                <div id="${solutionId}" class="solution-frame solution">${solutionContent}</div>
                             </div>
                         `;
                     });
