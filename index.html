@@ -332,14 +332,10 @@
                 if (labelMatch) {
                     let imageFilename = labelMatch[1].trim();
 
-                    // If images are in a subdirectory, adjust the path accordingly
-                    // For example, if images are in 'Figures' folder:
-                    // imgTag = `<img src="Figures/${imageFilename}" alt="Figure">`;
-
                     // Assuming images are in the same directory as the HTML file
                     imgTag = `<img src="${imageFilename}" alt="Figure">`;
                 } else {
-                    console.warn('No \\label found in figure environment.');
+                    console.warn('No \label found in figure environment.');
                 }
                 if (captionMatch) {
                     const captionText = captionMatch[1].trim();
