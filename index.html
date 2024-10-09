@@ -17,10 +17,9 @@
             padding: 0;
             position: relative;
             min-height: 100vh;
-            padding-top: 70px; /* Adjusted padding-top */
+            padding-top: 70px;
         }
 
-        /* Adjusted .title styling */
         .title {
             position: fixed;
             top: 0;
@@ -35,10 +34,9 @@
             z-index: 1000;
         }
 
-        /* Adjusted .links styling */
         .links {
             position: fixed;
-            top: 60px; /* Adjusted to be below the title */
+            top: 60px;
             left: 0;
             width: 200px;
             height: calc(100% - 60px);
@@ -48,7 +46,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
-            overflow-y: auto; /* Allow vertical scrolling if needed */
+            overflow-y: auto;
         }
 
         .link {
@@ -57,10 +55,9 @@
             text-decoration: underline;
             color: blue;
             padding: 5px 0;
-            flex-shrink: 0; /* Prevent the link from shrinking */
+            flex-shrink: 0;
         }
 
-        /* Adjusted .question-box to center on the page */
         .question-box {
             background-color: #f9f9f9;
             padding: 20px;
@@ -105,7 +102,6 @@
             border-radius: 10px;
         }
 
-        /* Adjusted .navigation to center the question number */
         .navigation {
             display: none;
             align-items: center;
@@ -125,12 +121,11 @@
             gap: 10px;
         }
 
-        /* Position the left and right buttons */
         .nav-buttons.left-buttons {
             position: absolute;
             left: 20px;
             display: flex;
-            gap: 10px; /* Adjust the gap as needed */
+            gap: 10px;
         }
 
         .nav-buttons.right-buttons {
@@ -151,19 +146,17 @@
             display: none;
         }
 
-        /* Adjust main content when links are visible */
         .content-with-links {
             margin-left: 220px;
         }
 
-        /* Message when week content is missing */
         .missing-week-message {
-            display: none; /* Hidden by default */
+            display: none;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            text-align: center; /* Center text and image */
+            text-align: center;
         }
 
         .missing-week-message img {
@@ -175,72 +168,6 @@
         .missing-week-message div {
             font-size: 24px;
             font-weight: bold;
-        }
-
-        /* Media query for smaller screens */
-        @media (max-width: 800px) {
-            .links {
-                position: static;
-                width: 100%;
-                height: auto;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                padding: 10px 0;
-                top: auto;
-                overflow: visible; /* Ensure all content is visible */
-                /* Removed margin-top */
-            }
-
-            .link {
-                padding: 5px 10px;
-                flex: 1 1 30%; /* Adjust width for each link */
-                text-align: center;
-                box-sizing: border-box;
-            }
-
-            .question-box {
-                margin-left: auto;
-                margin-right: auto;
-            }
-
-            /* Adjust navigation for small screens */
-            .navigation {
-                flex-direction: column;
-                position: static;
-                padding: 10px;
-            }
-
-            .nav-buttons.left-buttons,
-            .nav-buttons.right-buttons {
-                position: static;
-                margin: 10px 0;
-            }
-
-            .current-question {
-                margin: 10px 0;
-            }
-
-            .missing-week-message {
-                position: static;
-                transform: none;
-                margin-top: 50px;
-                padding: 0 20px;
-            }
-
-            /* Adjust body padding-top on small screens */
-            body {
-                padding-top: 70px; /* Increased padding-top */
-            }
-
-            /* Adjust .links top position on small screens */
-            .links {
-                position: static;
-                top: auto;
-                height: auto;
-                padding-top: 0;
-                /* Removed margin-top: -20px; */
-            }
         }
     </style>
 </head>
@@ -254,23 +181,13 @@
         <div class="link" onclick="showQuestions(2)">Woche 2</div>
         <div class="link" onclick="showQuestions(3)">Woche 3</div>
         <div class="link" onclick="showQuestions(4)">Woche 4</div>
-        <div class="link" onclick="showQuestions(5)">Woche 5</div>
-        <div class="link" onclick="showQuestions(6)">Woche 6</div>
-        <div class="link" onclick="showQuestions(7)">Woche 7</div>
-        <div class="link" onclick="showQuestions(8)">Woche 8</div>
-        <div class="link" onclick="showQuestions(9)">Woche 9</div>
-        <div class="link" onclick="showQuestions(10)">Woche 10</div>
-        <div class="link" onclick="showQuestions(11)">Woche 11</div>
-        <div class="link" onclick="showQuestions(12)">Woche 12</div>
+        <!-- More weeks here -->
     </div>
 
     <!-- Question content -->
     <div id="weekContent" class="question-box">
-        <!-- The title inside the question box -->
         <h2 id="weekTitle">Physik Grundlagen</h2>
         <div id="questionsContainer"></div>
-        <!-- Add Download PDF Button -->
-        
     </div>
 
     <!-- Message when week content is missing -->
@@ -294,21 +211,16 @@
     <script>
         let currentQuestion = 1;
         let totalQuestions = 0;
-        let currentWeek = 0; // To keep track of the current week
+        let currentWeek = 0;
 
-        // Mapping of week numbers to titles
         const weekTitles = {
             2: 'Physik Grundlagen',
             3: 'Impuls',
             4: 'Impuls-Raketen',
-            // Add titles for other weeks if necessary
         };
 
-        // Load questions from WeekX_questions.html
         function loadQuestions(weekNumber) {
-            currentWeek = weekNumber; // Set the current week
-
-            // Set the weekTitle based on the weekNumber
+            currentWeek = weekNumber;
             document.getElementById('weekTitle').innerText = weekTitles[weekNumber] || 'Physik Grundlagen';
 
             fetch(`Week${weekNumber}_questions.html`)
@@ -333,10 +245,13 @@
                         const hint = doc.querySelector(`#hint-${index + 1}`);
                         const solution = doc.querySelector(`#solution-${index + 1}`);
 
+                        const figure = doc.querySelector(`#figure-${index + 1}`);
+
                         questionHTML += `
                             <div class="question-frame" id="${questionId}" style="display:none;">
                                 <h2>Aufgabe ${index + 1}</h2>
                                 ${question.nextElementSibling ? question.nextElementSibling.outerHTML : ''}
+                                ${figure ? `<img src="${figure.src}" alt="${figure.alt}" style="max-width:100%; margin-top:10px;">` : ''}
                                 <div class="buttons">
                                     <button class="hint-btn" data-hint-id="${hintId}">Hinweis anzeigen</button>
                                     <button class="solution-btn" data-solution-id="${solutionId}">Lösung anzeigen</button>
@@ -351,27 +266,16 @@
                     totalQuestions = questions.length;
 
                     if (totalQuestions === 0) {
-                        // No questions found in the file
                         handleMissingWeek(weekNumber);
                     } else {
                         updateQuestionDisplay();
-
-                        // Bind click events to buttons after questions are loaded
                         bindButtonEvents();
-
-                        // Ensure MathJax processes any equations
                         MathJax.typesetPromise();
-
-                        // Show navigation buttons
                         document.getElementById('firstQuestionBtn').style.display = 'inline-block';
                         document.getElementById('prevBtn').style.display = 'inline-block';
                         document.getElementById('nextBtn').style.display = 'inline-block';
                         document.getElementById('questionNumber').style.display = 'inline-block';
-
-                        // Hide missing week message
                         document.getElementById('missingWeekMessage').style.display = 'none';
-
-                        // Show question box and download PDF button
                         document.getElementById('weekContent').style.display = 'block';
                         document.getElementById('downloadPdfBtn').style.display = 'inline-block';
                     }
@@ -382,62 +286,24 @@
                 });
         }
 
-        function handleMissingWeek(weekNumber) {
-            // Replace the title with empty string
-            document.getElementById('pageTitle').innerText = '';
-            document.getElementById('weekTitle').style.display = 'none'; // Hide the week title inside the question box
-
-            // Hide the questions container and question box
-            document.getElementById('questionsContainer').innerHTML = '';
-            document.getElementById('weekContent').style.display = 'none';
-
-            // Display the missing week message with image
-            const missingWeekMessage = document.getElementById('missingWeekMessage');
-            missingWeekMessage.innerHTML = `
-                <img src="under.png" alt="Under Construction">
-                <div>Wird in Woche ${weekNumber} hochgeladen</div>
-            `;
-            missingWeekMessage.style.display = 'block';
-
-            // Show only the "Zurück zu den Links" button
-            document.getElementById('firstQuestionBtn').style.display = 'none';
-            document.getElementById('downloadPdfBtn').style.display = 'none';
-            document.getElementById('prevBtn').style.display = 'none';
-            document.getElementById('nextBtn').style.display = 'none';
-            document.getElementById('questionNumber').style.display = 'none';
-
-            // Ensure the navigation bar is visible
-            document.querySelector('.navigation').style.display = 'flex';
-        }
-
         function bindButtonEvents() {
-            // Bind click event to all hint buttons
             document.querySelectorAll('.hint-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const hintId = this.getAttribute('data-hint-id');
                     const hintElement = document.getElementById(hintId);
                     const isHidden = hintElement.style.display === 'none' || hintElement.style.display === '';
                     toggleDisplay(hintId);
-                    if (isHidden) {
-                        this.innerText = 'Hinweis verbergen';
-                    } else {
-                        this.innerText = 'Hinweis anzeigen';
-                    }
+                    this.innerText = isHidden ? 'Hinweis verbergen' : 'Hinweis anzeigen';
                 });
             });
 
-            // Bind click event to all solution buttons
             document.querySelectorAll('.solution-btn').forEach(button => {
                 button.addEventListener('click', function() {
                     const solutionId = this.getAttribute('data-solution-id');
                     const solutionElement = document.getElementById(solutionId);
                     const isHidden = solutionElement.style.display === 'none' || solutionElement.style.display === '';
                     toggleDisplay(solutionId);
-                    if (isHidden) {
-                        this.innerText = 'Lösung verbergen';
-                    } else {
-                        this.innerText = 'Lösung anzeigen';
-                    }
+                    this.innerText = isHidden ? 'Lösung verbergen' : 'Lösung anzeigen';
                 });
             });
         }
@@ -448,47 +314,36 @@
         }
 
         function showQuestions(weekNumber) {
-            currentQuestion = 1; // Reset to the first question
+            currentQuestion = 1;
             document.getElementById('weekContent').style.display = 'block';
             document.querySelector('.navigation').style.display = 'flex';
-            document.querySelector('.links').style.display = 'none'; // Hide the links when showing questions
+            document.querySelector('.links').style.display = 'none';
             document.body.classList.remove('showing-links');
             document.body.classList.add('showing-questions');
-            // Add class to adjust content margin
             document.getElementById('weekContent').classList.remove('content-with-links');
-
-            // Reset the page title
             document.getElementById('pageTitle').innerText = 'PHY1';
-            document.getElementById('weekTitle').style.display = 'block'; // Show the week title
-
-            // Hide missing week message
+            document.getElementById('weekTitle').style.display = 'block';
             document.getElementById('missingWeekMessage').style.display = 'none';
-
             loadQuestions(weekNumber);
         }
 
-        // Function to return to the homepage
-        function showHomepage() {
+        function handleMissingWeek(weekNumber) {
+            document.getElementById('pageTitle').innerText = '';
+            document.getElementById('weekTitle').style.display = 'none';
+            document.getElementById('questionsContainer').innerHTML = '';
             document.getElementById('weekContent').style.display = 'none';
-            document.querySelector('.navigation').style.display = 'none';
-            document.querySelector('.links').style.display = 'flex'; // Show the links again
-            document.body.classList.remove('showing-questions');
-            document.body.classList.add('showing-links');
-            // Add class to adjust content margin
-            document.getElementById('weekContent').classList.add('content-with-links');
-
-            // Reset the page title
-            document.getElementById('pageTitle').innerText = 'PHY1';
-
-            // Hide missing week message
-            document.getElementById('missingWeekMessage').style.display = 'none';
-        }
-
-        // Function to go back to the first question
-        function goToFirstQuestion() {
-            currentQuestion = 1;
-            updateQuestionDisplay();
-            window.scrollTo(0, 0); // Scroll to top of the page
+            const missingWeekMessage = document.getElementById('missingWeekMessage');
+            missingWeekMessage.innerHTML = `
+                <img src="under.png" alt="Under Construction">
+                <div>Wird in Woche ${weekNumber} hochgeladen</div>
+            `;
+            missingWeekMessage.style.display = 'block';
+            document.getElementById('firstQuestionBtn').style.display = 'none';
+            document.getElementById('downloadPdfBtn').style.display = 'none';
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').style.display = 'none';
+            document.getElementById('questionNumber').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'flex';
         }
 
         function updateQuestionDisplay() {
@@ -496,7 +351,6 @@
                 const questionElement = document.getElementById(`question${i}`);
                 questionElement.style.display = (i === currentQuestion) ? 'block' : 'none';
             }
-
             document.getElementById('questionNumber').innerText = `${currentQuestion}/${totalQuestions}`;
             document.getElementById('prevBtn').disabled = (currentQuestion === 1);
             document.getElementById('nextBtn').disabled = (currentQuestion === totalQuestions);
@@ -516,22 +370,34 @@
             }
         }
 
-        // Function to download PDF for the current week
+        function goToFirstQuestion() {
+            currentQuestion = 1;
+            updateQuestionDisplay();
+            window.scrollTo(0, 0);
+        }
+
+        function showHomepage() {
+            document.getElementById('weekContent').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.links').style.display = 'flex';
+            document.body.classList.remove('showing-questions');
+            document.body.classList.add('showing-links');
+            document.getElementById('weekContent').classList.add('content-with-links');
+            document.getElementById('pageTitle').innerText = 'PHY1';
+            document.getElementById('missingWeekMessage').style.display = 'none';
+        }
+
         function downloadPdf() {
             if (currentWeek > 0) {
                 window.location.href = `Woche${currentWeek}_questions.pdf`;
             }
         }
 
-        // Initialize the page
         window.onload = function() {
             document.querySelector('.navigation').style.display = 'none';
             document.getElementById('weekContent').style.display = 'none';
             document.body.classList.add('showing-links');
-            // Add class to adjust content margin
             document.getElementById('weekContent').classList.add('content-with-links');
-
-            // Hide missing week message
             document.getElementById('missingWeekMessage').style.display = 'none';
         }
     </script>
